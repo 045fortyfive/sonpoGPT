@@ -265,60 +265,49 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
             // Survey complete
             setSurveyComplete(true);
 
-            // 1. Show "Organizing" state (not diagnosis)
-            const thinkingMsg = "ちょっと整理しますね...";
+            // Play out the guidance sequence (case-by-case advice)
+            const guidanceSequence = getGuidanceSequence();
+            let delay = 800;
+
+            // Intro message
             setTimeout(() => {
-                setMessages((prev) => [...prev, { role: "assistant", content: thinkingMsg, isTyping: true }]);
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        role: "assistant",
+                        content: "売却後の保険について、いくつかケースをご紹介しますね。",
+                        isTyping: true
+                    }
+                ]);
+            }, delay);
 
-                // 2. Play out the guidance sequence (case-by-case advice)
-                const guidanceSequence = getGuidanceSequence();
-
-                // Helper to chain messages
-                let delay = 1500;
-
-                // First, remove thinking msg and show first case
-                setTimeout(() => {
-                    setMessages((prev) => {
-                        const filtered = prev.filter(m => m.content !== thinkingMsg);
-                        return [
-                            ...filtered,
-                            {
-                                role: "assistant",
-                                content: "売却後の保険について、いくつかケースをご紹介しますね。",
-                                isTyping: true
-                            }
-                        ];
-                    });
-                }, delay);
-
-                // Show each case
-                for (let i = 0; i < guidanceSequence.length; i++) {
-                    delay += 3500;
-                    setTimeout(() => {
-                        setMessages((prev) => [
-                            ...prev,
-                            {
-                                role: "assistant",
-                                content: guidanceSequence[i].content,
-                                isTyping: true
-                            }
-                        ]);
-                    }, delay);
-                }
-
-                // 3. Ask about price
-                delay += 4000;
+            // Show each case
+            for (let i = 0; i < guidanceSequence.length; i++) {
+                delay += 3500;
                 setTimeout(() => {
                     setMessages((prev) => [
                         ...prev,
-                        { role: "assistant", content: "最後に、現在の自動車保険料は月額いくらくらいでしょうか？\n一番お得なプランと比較できます。", isTyping: true }
+                        {
+                            role: "assistant",
+                            content: guidanceSequence[i].content,
+                            isTyping: true
+                        }
                     ]);
-
-                    setTimeout(() => {
-                        setShowPriceInput(true);
-                    }, 1000);
                 }, delay);
-            }, 800);
+            }
+
+            // 3. Ask about price
+            delay += 4000;
+            setTimeout(() => {
+                setMessages((prev) => [
+                    ...prev,
+                    { role: "assistant", content: "最後に、現在の自動車保険料は月額いくらくらいでしょうか？\n一番お得なプランと比較できます。", isTyping: true }
+                ]);
+
+                setTimeout(() => {
+                    setShowPriceInput(true);
+                }, 1000);
+            }, delay);
         }
     };
 
