@@ -90,7 +90,7 @@ const initialQuestions = [
 const insuranceQuestions = [
     {
         id: "insurance_status",
-        text: "山田様、貴重なフィードバックをありがとうございます！\n\nところで、実は売却後の『保険』の手続きを忘れると、数万円単位で損をしてしまうことがあるんです...\n\n今の自動車保険の状態はどうなっていますか？",
+        text: "今の自動車保険の状態をお伺いしてもよろしいでしょうか？",
         options: [
             { value: "active", label: "そのまま残っている" },
             { value: "cancelled", label: "すでに解約した" },
@@ -275,9 +275,25 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
         }
     }, []);
 
+    // Generate personalized feedback response
+    const getFeedbackResponse = (issueValue: string): string => {
+        switch (issueValue) {
+            case "price":
+                return "価格の説明がわかりにくく、大変ご迷惑をおかけして申し訳ございませんでした。\n\n今後の改善に向けて、社内で共有し徹底させていただきます。\n\n貴重なご意見ありがとうございました。";
+            case "process":
+                return "手続きの流れについて、ご不安な思いをさせてしまい申し訳ございません。\n\nより分かりやすい案内ができるよう、改善に努めてまいります。\n\nご指摘ありがとうございました。";
+            case "time":
+                return "お時間をとらせてしまい、大変申し訳ございませんでした。\n\nよりスムーズな対応ができるよう、オペレーションを見直してまいります。\n\n貴重なご意見をありがとうございます。";
+            case "after":
+                return "売却後のことについて、説明不足があり申し訳ございません。\n\nまさに今からご案内する「保険」のことも含め、アフターフォローを強化してまいります。";
+            default:
+                return "貴重なフィードバックをありがとうございます！\n\n山田様のお力になれて、スタッフ一同大変嬉しく思います。";
+        }
+    };
+
     const handleOptionSelect = (value: string, label: string) => {
         const q = questions[currentQuestion];
-        const questionId = 'id' in q ? q.id : `q${currentQuestion} `;
+        const questionId = 'id' in q ? q.id : `q${currentQuestion}`;
         const newAnswers = { ...answers, [questionId]: value };
         setAnswers(newAnswers);
 
@@ -287,13 +303,37 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
         if (currentQuestion < questions.length - 1) {
             // Show next question
             const nextQ = questions[currentQuestion + 1];
-            setTimeout(() => {
-                setMessages((prev) => [
-                    ...prev,
-                    { role: "assistant", content: nextQ.text, options: nextQ.options, isTyping: true },
-                ]);
-                setCurrentQuestion(currentQuestion + 1);
-            }, 500);
+
+            // Special handling for transition from issue question to insurance questions
+            if (questionId === "issue") {
+                const feedbackMsg = getFeedbackResponse(value);
+                const bridgeMsg = "最後に、手続き忘れで損をしないために... 大切な車の『保険』の状況だけ確認させてください。";
+
+                setTimeout(() => {
+                    setMessages((prev) => [
+                        ...prev,
+                        { role: "assistant", content: feedbackMsg, isTyping: true },
+                    ]);
+
+                    setTimeout(() => {
+                        setMessages((prev) => [
+                            ...prev,
+                            { role: "assistant", content: bridgeMsg, isTyping: true },
+                            { role: "assistant", content: nextQ.text, options: nextQ.options, isTyping: true },
+                        ]);
+                        setCurrentQuestion(currentQuestion + 1);
+                    }, 2500); // Wait for feedback message to be read
+                }, 500);
+            } else {
+                // Normal transition
+                setTimeout(() => {
+                    setMessages((prev) => [
+                        ...prev,
+                        { role: "assistant", content: nextQ.text, options: nextQ.options, isTyping: true },
+                    ]);
+                    setCurrentQuestion(currentQuestion + 1);
+                }, 500);
+            }
         } else {
             // Survey complete, show static guidance
             setSurveyComplete(true);
@@ -408,7 +448,8 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
             {!chatEnabled && (
                 <div className="bg-gray-50 border-b border-gray-100 p-4">
                     <div className="max-w-3xl mx-auto flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-sm">
+                        <div className="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-sm overflow-hidden">
+                            {/* User Avatar Placeholder */}
                             <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
@@ -422,6 +463,26 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                                 査定・売却データ: <span className="text-blue-600 font-medium">{mockProfile.carName}</span>
                             </p>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Yumi Welcome Banner */}
+            {!chatEnabled && messages.length > 0 && currentQuestion === 0 && (
+                <div className="bg-white border-b border-gray-100">
+                    <div className="max-w-3xl mx-auto px-4 py-8 text-center">
+                        <div className="relative w-32 h-32 mx-auto mb-4">
+                            <img
+                                src="https://assets.masco.dev/dd6028/yumi-fb5f/elegant-polite-bow-b6d8d359.png"
+                                alt="Yumi Bowing"
+                                className="w-full h-full object-contain"
+                            />
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">山田様、ご利用ありがとうございました！</h2>
+                        <p className="text-gray-600 text-sm">
+                            愛車のご売却、おめでとうございます。<br />
+                            担当させていただいたAIコンシェルジュのYumiです。
+                        </p>
                     </div>
                 </div>
             )}
@@ -456,18 +517,20 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                             <div key={index} className={`fade-in ${message.role === "user" ? "flex justify-end" : ""}`}>
                                 <div className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse max-w-[85%]" : "max-w-full"}`}>
                                     {/* Avatar */}
-                                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${message.role === "user"
-                                        ? "bg-gray-100"
-                                        : "bg-gradient-to-br from-blue-500 to-blue-600"
+                                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center overflow-hidden border ${message.role === "user"
+                                        ? "bg-gray-100 border-gray-200"
+                                        : "bg-blue-50 border-blue-100"
                                         }`}>
                                         {message.role === "user" ? (
-                                            <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
                                         ) : (
-                                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                            </svg>
+                                            <img
+                                                src="https://assets.masco.dev/dd6028/yumi-fb5f/elegant-polite-bow-04192efd.png"
+                                                alt="Yumi"
+                                                className="w-full h-full object-cover transform scale-125 translate-y-1"
+                                            />
                                         )}
                                     </div>
 
@@ -533,10 +596,12 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                         {/* Loading indicator */}
                         {isLoading && (
                             <div className="flex gap-3 fade-in">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                    </svg>
+                                <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center overflow-hidden">
+                                    <img
+                                        src="https://assets.masco.dev/dd6028/yumi-fb5f/elegant-polite-bow-04192efd.png"
+                                        alt="Yumi"
+                                        className="w-full h-full object-cover transform scale-125 translate-y-1"
+                                    />
                                 </div>
                                 <div className="bg-gray-100 rounded-2xl px-4 py-3">
                                     <div className="flex gap-1.5">
