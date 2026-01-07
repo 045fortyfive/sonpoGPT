@@ -216,11 +216,15 @@ ${insuranceStatus === "unknown" ? `
 
 **等級は引き継げる？**
 - 解約から13ヶ月以内なら引き継ぎ可能
+- それ以降は新規（6等級）からスタート
+`;
+    }
+
     // デフォルト（フォールバック）
     return `## 🔍 山田様の状況を診断しました
 
-        ご回答ありがとうございます。
-        今の状況に基づき、** 損をしないための最適なステップ ** を作成しました。`;
+ご回答ありがとうございます。
+今の状況に基づき、**損をしないための最適なステップ**を作成しました。`;
 }
 
 
@@ -273,7 +277,7 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
 
     const handleOptionSelect = (value: string, label: string) => {
         const q = questions[currentQuestion];
-        const questionId = 'id' in q ? q.id : `q${ currentQuestion } `;
+        const questionId = 'id' in q ? q.id : `q${currentQuestion} `;
         const newAnswers = { ...answers, [questionId]: value };
         setAnswers(newAnswers);
 
@@ -324,7 +328,7 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
 
         setMessages((prev) => [
             ...prev,
-            { role: "user", content: `現在の保険料: 月額 ¥${ price.toLocaleString() } ` },
+            { role: "user", content: `現在の保険料: 月額 ¥${price.toLocaleString()} ` },
         ]);
 
         setTimeout(() => {
@@ -428,252 +432,252 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                     <div className="max-w-3xl mx-auto">
                         <div className="flex justify-between items-center mb-2">
                             <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-                                {surveyComplete ? "診断完了" : `質問 ${ currentStep + 1 } / ${totalSteps}`
-    }
+                                {surveyComplete ? "診断完了" : `質問 ${currentStep + 1} / ${totalSteps}`
+                                }
                             </span >
-        <span className="text-xs font-medium text-gray-400">{Math.round(progress)}%</span>
+                            <span className="text-xs font-medium text-gray-400">{Math.round(progress)}%</span>
                         </div >
-        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div
-                className="h-full bg-blue-600 rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${progress}%` }}
-            />
-        </div>
+                        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-blue-600 rounded-full transition-all duration-500 ease-out"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
                     </div >
                 </div >
             )
-}
+            }
 
-{/* Messages */ }
-<div className="flex-1 overflow-y-auto">
-    <div className="max-w-3xl mx-auto px-4 py-6">
-        <div className="space-y-4">
-            {messages.map((message, index) => (
-                <div key={index} className={`fade-in ${message.role === "user" ? "flex justify-end" : ""}`}>
-                    <div className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse max-w-[85%]" : "max-w-full"}`}>
-                        {/* Avatar */}
-                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${message.role === "user"
-                            ? "bg-gray-100"
-                            : "bg-gradient-to-br from-blue-500 to-blue-600"
-                            }`}>
-                            {message.role === "user" ? (
-                                <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                            ) : (
-                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                </svg>
-                            )}
-                        </div>
-
-                        {/* Message content */}
-                        <div className="flex-1">
-                            <div className={`inline-block px-4 py-3 rounded-2xl ${message.role === "user"
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-100 text-gray-900"
-                                }`}>
-                                {message.role === "assistant" ? (
-                                    <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-h2:text-base prose-h3:text-sm prose-p:text-[15px] prose-p:leading-relaxed prose-li:text-[15px] prose-strong:text-gray-900 prose-table:text-sm prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded">
-                                        {message.isTyping ? (
-                                            <Typewriter
-                                                text={message.content}
-                                                onComplete={() => {
-                                                    // Optional: keep as static once done
-                                                }}
-                                            />
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto">
+                <div className="max-w-3xl mx-auto px-4 py-6">
+                    <div className="space-y-4">
+                        {messages.map((message, index) => (
+                            <div key={index} className={`fade-in ${message.role === "user" ? "flex justify-end" : ""}`}>
+                                <div className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse max-w-[85%]" : "max-w-full"}`}>
+                                    {/* Avatar */}
+                                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${message.role === "user"
+                                        ? "bg-gray-100"
+                                        : "bg-gradient-to-br from-blue-500 to-blue-600"
+                                        }`}>
+                                        {message.role === "user" ? (
+                                            <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
                                         ) : (
-                                            <ReactMarkdown>{message.content}</ReactMarkdown>
+                                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                            </svg>
                                         )}
                                     </div>
-                                ) : (
-                                    <p className="whitespace-pre-wrap text-[15px] leading-relaxed">{message.content}</p>
+
+                                    {/* Message content */}
+                                    <div className="flex-1">
+                                        <div className={`inline-block px-4 py-3 rounded-2xl ${message.role === "user"
+                                            ? "bg-blue-600 text-white"
+                                            : "bg-gray-100 text-gray-900"
+                                            }`}>
+                                            {message.role === "assistant" ? (
+                                                <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-h2:text-base prose-h3:text-sm prose-p:text-[15px] prose-p:leading-relaxed prose-li:text-[15px] prose-strong:text-gray-900 prose-table:text-sm prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded">
+                                                    {message.isTyping ? (
+                                                        <Typewriter
+                                                            text={message.content}
+                                                            onComplete={() => {
+                                                                // Optional: keep as static once done
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <p className="whitespace-pre-wrap text-[15px] leading-relaxed">{message.content}</p>
+                                            )}
+                                        </div>
+
+                                        {/* Options */}
+                                        {message.options && !surveyComplete && index === messages.length - 1 && (
+                                            <div className="mt-4 space-y-2 bg-blue-50/50 p-4 rounded-2xl border border-blue-100 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                                    <span className="text-[11px] font-bold text-blue-600 uppercase tracking-widest">選択して進む</span>
+                                                </div>
+                                                {message.options.map((option) => (
+                                                    <button
+                                                        key={option.value}
+                                                        onClick={() => handleOptionSelect(option.value, option.label)}
+                                                        className="flex items-center justify-between w-full text-left px-5 py-3.5 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 hover:shadow-md transition-all duration-300 group"
+                                                    >
+                                                        <span className="text-gray-900 text-[15px] font-medium transition-colors group-hover:text-blue-700">{option.label}</span>
+                                                        <div className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center group-hover:border-blue-400 group-hover:bg-blue-50 transition-all">
+                                                            <svg className="w-3.5 h-3.5 text-transparent group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Timeline Component */}
+                                        {message.timelinePattern && (
+                                            <div className="mt-4">
+                                                <InsuranceTimeline pattern={message.timelinePattern} />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Loading indicator */}
+                        {isLoading && (
+                            <div className="flex gap-3 fade-in">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                    </svg>
+                                </div>
+                                <div className="bg-gray-100 rounded-2xl px-4 py-3">
+                                    <div className="flex gap-1.5">
+                                        <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot" />
+                                        <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot" />
+                                        <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot" />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Price Input */}
+                        {showPriceInput && !showSavings && (
+                            <div className="fade-in-up">
+                                <div className="flex gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-4 shadow-sm">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">
+                                                    Q
+                                                </div>
+                                                <p className="text-sm font-bold text-blue-900">現在の保険料について</p>
+                                            </div>
+                                            <p className="text-[15px] text-gray-800 mb-4 leading-relaxed">
+                                                削減額をシミュレーションするために、今の保険料を選択してください。
+                                            </p>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                {[
+                                                    { label: "月3,000円未満", value: 2500 },
+                                                    { label: "月3,000〜5,000円", value: 4000 },
+                                                    { label: "月5,000〜8,000円", value: 6500 },
+                                                    { label: "月8,000円以上", value: 10000 },
+                                                ].map((option) => (
+                                                    <button
+                                                        key={option.value}
+                                                        onClick={() => handlePriceSelect(option.value)}
+                                                        className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 hover:shadow-md transition-all duration-200 group"
+                                                    >
+                                                        <span className="text-gray-900 text-sm font-medium">{option.label}</span>
+                                                        <svg className="w-4 h-4 text-gray-300 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Savings Display */}
+                        {showSavings && savingsData && (
+                            <div className="fade-in-up">
+                                <SavingsOffer {...savingsData} />
+                            </div>
+                        )}
+
+                        {/* Offer CTA */}
+                        {showOffer && (
+                            <div className="fade-in-up mt-6 space-y-4">
+                                {/* Insurance Plan */}
+                                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold text-gray-900 mb-1">保険おまかせプラン</h3>
+                                            <p className="text-sm text-gray-600 mb-3">
+                                                {savingsData && savingsData.monthlySavings > 0
+                                                    ? `年間¥${savingsData.yearlySavings.toLocaleString()}削減できる可能性があります。`
+                                                    : "解約・切替・新規加入まで、面倒な手続きをすべて代行。"}
+                                                <span className="text-blue-600 font-medium"> 相談無料</span>
+                                            </p>
+                                            <button className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200">
+                                                詳しく聞いてみる
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Additional question button */}
+                                {!chatEnabled && (
+                                    <button
+                                        onClick={enableChat}
+                                        className="w-full p-4 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 text-sm"
+                                    >
+                                        💬 他にも質問がある
+                                    </button>
                                 )}
                             </div>
+                        )}
 
-                            {/* Options */}
-                            {message.options && !surveyComplete && index === messages.length - 1 && (
-                                <div className="mt-4 space-y-2 bg-blue-50/50 p-4 rounded-2xl border border-blue-100 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                                        <span className="text-[11px] font-bold text-blue-600 uppercase tracking-widest">選択して進む</span>
-                                    </div>
-                                    {message.options.map((option) => (
-                                        <button
-                                            key={option.value}
-                                            onClick={() => handleOptionSelect(option.value, option.label)}
-                                            className="flex items-center justify-between w-full text-left px-5 py-3.5 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 hover:shadow-md transition-all duration-300 group"
-                                        >
-                                            <span className="text-gray-900 text-[15px] font-medium transition-colors group-hover:text-blue-700">{option.label}</span>
-                                            <div className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center group-hover:border-blue-400 group-hover:bg-blue-50 transition-all">
-                                                <svg className="w-3.5 h-3.5 text-transparent group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Timeline Component */}
-                            {message.timelinePattern && (
-                                <div className="mt-4">
-                                    <InsuranceTimeline pattern={message.timelinePattern} />
-                                </div>
-                            )}
-                        </div>
+                        <div ref={messagesEndRef} />
                     </div>
                 </div>
-            ))}
+            </div>
 
-            {/* Loading indicator */}
-            {isLoading && (
-                <div className="flex gap-3 fade-in">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </div>
-                    <div className="bg-gray-100 rounded-2xl px-4 py-3">
-                        <div className="flex gap-1.5">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot" />
-                            <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot" />
-                            <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot" />
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Price Input */}
-            {showPriceInput && !showSavings && (
-                <div className="fade-in-up">
-                    <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
-                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                        </div>
-                        <div className="flex-1">
-                            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-4 shadow-sm">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">
-                                        Q
-                                    </div>
-                                    <p className="text-sm font-bold text-blue-900">現在の保険料について</p>
-                                </div>
-                                <p className="text-[15px] text-gray-800 mb-4 leading-relaxed">
-                                    削減額をシミュレーションするために、今の保険料を選択してください。
-                                </p>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {[
-                                        { label: "月3,000円未満", value: 2500 },
-                                        { label: "月3,000〜5,000円", value: 4000 },
-                                        { label: "月5,000〜8,000円", value: 6500 },
-                                        { label: "月8,000円以上", value: 10000 },
-                                    ].map((option) => (
-                                        <button
-                                            key={option.value}
-                                            onClick={() => handlePriceSelect(option.value)}
-                                            className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 hover:shadow-md transition-all duration-200 group"
-                                        >
-                                            <span className="text-gray-900 text-sm font-medium">{option.label}</span>
-                                            <svg className="w-4 h-4 text-gray-300 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Savings Display */}
-            {showSavings && savingsData && (
-                <div className="fade-in-up">
-                    <SavingsOffer {...savingsData} />
-                </div>
-            )}
-
-            {/* Offer CTA */}
-            {showOffer && (
-                <div className="fade-in-up mt-6 space-y-4">
-                    {/* Insurance Plan */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5">
-                        <div className="flex items-start gap-4">
-                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                </svg>
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="font-semibold text-gray-900 mb-1">保険おまかせプラン</h3>
-                                <p className="text-sm text-gray-600 mb-3">
-                                    {savingsData && savingsData.monthlySavings > 0
-                                        ? `年間¥${savingsData.yearlySavings.toLocaleString()}削減できる可能性があります。`
-                                        : "解約・切替・新規加入まで、面倒な手続きをすべて代行。"}
-                                    <span className="text-blue-600 font-medium"> 相談無料</span>
-                                </p>
-                                <button className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200">
-                                    詳しく聞いてみる
+            {/* Input area - only show when chat is enabled */}
+            {
+                chatEnabled && (
+                    <div className="sticky bottom-0 bg-white border-t border-gray-100">
+                        <div className="max-w-3xl mx-auto px-4 py-4">
+                            <div className="relative flex items-end gap-3 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                                <textarea
+                                    ref={inputRef}
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="ご質問を入力..."
+                                    rows={1}
+                                    className="flex-1 bg-transparent px-4 py-3 resize-none text-[15px] placeholder:text-gray-400 focus:outline-none max-h-32"
+                                    disabled={isLoading}
+                                    style={{ minHeight: "48px" }}
+                                />
+                                <button
+                                    onClick={sendMessage}
+                                    disabled={isLoading || !input.trim()}
+                                    className="m-2 p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                    </svg>
                                 </button>
                             </div>
+
+                            <p className="text-xs text-gray-400 text-center mt-3">
+                                AIが回答します。詳細は保険会社にご確認ください。
+                            </p>
                         </div>
                     </div>
-
-                    {/* Additional question button */}
-                    {!chatEnabled && (
-                        <button
-                            onClick={enableChat}
-                            className="w-full p-4 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 text-sm"
-                        >
-                            💬 他にも質問がある
-                        </button>
-                    )}
-                </div>
-            )}
-
-            <div ref={messagesEndRef} />
-        </div>
-    </div>
-</div>
-
-{/* Input area - only show when chat is enabled */ }
-{
-    chatEnabled && (
-        <div className="sticky bottom-0 bg-white border-t border-gray-100">
-            <div className="max-w-3xl mx-auto px-4 py-4">
-                <div className="relative flex items-end gap-3 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-                    <textarea
-                        ref={inputRef}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder="ご質問を入力..."
-                        rows={1}
-                        className="flex-1 bg-transparent px-4 py-3 resize-none text-[15px] placeholder:text-gray-400 focus:outline-none max-h-32"
-                        disabled={isLoading}
-                        style={{ minHeight: "48px" }}
-                    />
-                    <button
-                        onClick={sendMessage}
-                        disabled={isLoading || !input.trim()}
-                        className="m-2 p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                        </svg>
-                    </button>
-                </div>
-
-                <p className="text-xs text-gray-400 text-center mt-3">
-                    AIが回答します。詳細は保険会社にご確認ください。
-                </p>
-            </div>
-        </div>
-    )
-}
+                )
+            }
         </div >
     );
 }
