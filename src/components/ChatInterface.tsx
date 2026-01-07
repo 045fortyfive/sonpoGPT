@@ -335,10 +335,15 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
             { role: "user", content: `現在の保険料: 月額 ¥${price.toLocaleString()} ` },
         ]);
 
+        // Only show savings, NOT the offer yet
         setTimeout(() => {
             setShowSavings(true);
-            setShowOffer(true);
+            // setShowOffer will be triggered by user action
         }, 300);
+    };
+
+    const showGiftCardOffer = () => {
+        setShowOffer(true);
     };
 
     const enableChat = () => {
@@ -633,6 +638,19 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                         {showSavings && savingsData && (
                             <div className="fade-in-up">
                                 <SavingsOffer {...savingsData} />
+
+                                {/* Show button to proceed to Gift Card offer if not yet shown */}
+                                {!showOffer && (
+                                    <button
+                                        onClick={showGiftCardOffer}
+                                        className="mt-4 w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                                    >
+                                        <span>さらにお得な情報を見る</span>
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                        </svg>
+                                    </button>
+                                )}
                             </div>
                         )}
 
