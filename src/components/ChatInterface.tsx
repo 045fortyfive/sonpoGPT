@@ -132,48 +132,30 @@ const inquiryQuestions = [
     },
 ];
 
-// 静的ガイダンスコンテンツを生成
-function generateGuidance(answers: Record<string, string>, type: "seller" | "inquiry"): string {
-    const insuranceStatus = answers.insurance_status || answers.insurance;
-    const nextCar = answers.next_car || answers.needs;
+// ガイダンスのシークエンスを生成（ケース別アドバイス）
+interface GuidanceMessage {
+    content: string;
+}
 
-    // パターン1: 保険まだ残っている + 次の車決まっている
-    if (insuranceStatus === "active" && nextCar === "decided") {
-        return `**必要なもの：**
-- 新しいプリウスの車検証
-- 現在の保険証券
+function getGuidanceSequence(): GuidanceMessage[] {
+    const sequence: GuidanceMessage[] = [];
 
-**手続きのタイムライン**
+    // ケース1: 納車まで期間が空く場合
+    sequence.push({
+        content: `**🚗 納車まで期間が空く場合**\n\n次の車まで1ヶ月以上空く場合は、「中断証明書」を発行しておくと、現在の等級を最大10年間保存できます。\nいざ次の車に乗る時にお得です。`
+    });
 
-[TIMELINE:replacement]
+    // ケース2: 切り替え（車両入替）の場合
+    sequence.push({
+        content: `**🔄 新しい車に切り替える場合**\n\n今の等級をそのまま引き継ぐことができます。\n必要なものは「新しい車の車検証」と「現在の保険証券」だけ。\n保険会社に連絡すれば手続きできます。`
+    });
 
-**納車まで期間が空く場合**
-売却から納車まで1ヶ月以上空く場合は、一時的に保険を「中断」できます。保険料の無駄を省けます。`;
-    }
+    // ケース3: 解約を考えている場合
+    sequence.push({
+        content: `**⚠️ 解約を考えている場合**\n\nそのまま解約してしまうと、今まで積み上げた等級（割引）がリセットされてしまいます。\n将来また車に乗る可能性があれば、「中断証明書」の発行をおすすめします。`
+    });
 
-    // パターン2: 保険まだ残っている + しばらく乗らない
-    if (insuranceStatus === "active" && (nextCar === "wait" || nextCar === "undecided")) {
-        return `## 🔍 山田様の状況診断結果
-| 項目 | 状態 |
-|------|------|
-| 自動車保険 | ✅ まだ有効 |
-| 次の車 | ⏸️ しばらく乗らない |
-
----
-
-## 🚗 次のアクションプラン
-### 「中断証明書」を取りましょう！
-💡 解約だけだと等級が消滅します。**中断証明書**を発行すれば、今の等級を最大10年間保存できます。将来また乗る時に有利です。
-**必要なもの：**
-- 売却・譲渡の証明
-- 保険証券
-
----
-
-[TIMELINE:suspension]`;
-    }
-
-    return `## 🔍 山田様の状況診断結果`;
+    return sequence;
 }
 
 
@@ -283,36 +265,59 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
             // Survey complete
             setSurveyComplete(true);
 
-            // 1. Show "Calculating/Investigating" state
+            // 1. Show "Organizing" state (not diagnosis)
+            const thinkingMsg = "ちょっと整理しますね...";
             setTimeout(() => {
-                const thinkingMsg = "診断中...";
                 setMessages((prev) => [...prev, { role: "assistant", content: thinkingMsg, isTyping: true }]);
 
-                // 2. Show Guidance and Timeline
-                setTimeout(() => {
-                    // Remove "Thinking" message or replace? Better to append result.
-                    // Actually, simpler to just append guidance.
-                    const guidance = generateGuidance(newAnswers, surveyType);
-                    const timelineMatch = guidance.match(/\[TIMELINE:(replacement|suspension|unknown)\]/);
-                    const timelinePattern = timelineMatch ? timelineMatch[1] as "replacement" | "suspension" | "unknown" : undefined;
-                    const cleanGuidance = guidance.replace(/\[TIMELINE:(replacement|suspension|unknown)\]/, '').trim();
+                // 2. Play out the guidance sequence (case-by-case advice)
+                const guidanceSequence = getGuidanceSequence();
 
+                // Helper to chain messages
+                let delay = 1500;
+
+                // First, remove thinking msg and show first case
+                setTimeout(() => {
                     setMessages((prev) => {
-                        // Remove the last "Thinking" message if desired, or just append. 
-                        // Let's replace the "Thinking" message with the real one for smooth transition, or just append after it.
-                        // Appending is safer.
                         const filtered = prev.filter(m => m.content !== thinkingMsg);
                         return [
                             ...filtered,
-                            { role: "assistant", content: cleanGuidance, isGuidance: true, timelinePattern, isTyping: true }
+                            {
+                                role: "assistant",
+                                content: "売却後の保険について、いくつかケースをご紹介しますね。",
+                                isTyping: true
+                            }
                         ];
                     });
+                }, delay);
 
-                    // 3. Show Price Input
+                // Show each case
+                for (let i = 0; i < guidanceSequence.length; i++) {
+                    delay += 3500;
+                    setTimeout(() => {
+                        setMessages((prev) => [
+                            ...prev,
+                            {
+                                role: "assistant",
+                                content: guidanceSequence[i].content,
+                                isTyping: true
+                            }
+                        ]);
+                    }, delay);
+                }
+
+                // 3. Ask about price
+                delay += 4000;
+                setTimeout(() => {
+                    setMessages((prev) => [
+                        ...prev,
+                        { role: "assistant", content: "最後に、現在の自動車保険料は月額いくらくらいでしょうか？\n一番お得なプランと比較できます。", isTyping: true }
+                    ]);
+
                     setTimeout(() => {
                         setShowPriceInput(true);
-                    }, 2000);
-                }, 2000);
+                    }, 1000);
+                }, delay);
             }, 800);
         }
     };
@@ -635,24 +640,28 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                         {showOffer && (
                             <div className="fade-in-up mt-6 space-y-4">
                                 {/* Insurance Plan */}
-                                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5">
+                                <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 shadow-sm">
                                     <div className="flex items-start gap-4">
-                                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
-                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                            </svg>
+                                        <div className="w-16 h-16 rounded-xl bg-white border border-amber-100 flex items-center justify-center flex-shrink-0 p-2 shadow-sm">
+                                            {/* Amazon Gift Card Icon Mock */}
+                                            <div className="text-center">
+                                                <span className="block text-[10px] font-bold text-gray-400">GIFT CARD</span>
+                                                <span className="block text-lg font-black text-amber-500">¥1,000</span>
+                                            </div>
                                         </div>
                                         <div className="flex-1">
-                                            <h3 className="font-semibold text-gray-900 mb-1">保険おまかせプラン</h3>
-                                            <p className="text-sm text-gray-600 mb-3">
-                                                {savingsData && savingsData.monthlySavings > 0
-                                                    ? `年間¥${savingsData.yearlySavings.toLocaleString()}削減できる可能性があります。`
-                                                    : "解約・切替・新規加入まで、面倒な手続きをすべて代行。"}
-                                                <span className="text-blue-600 font-medium"> 相談無料</span>
+                                            <h3 className="font-bold text-gray-900 mb-1">【無料】保険見直し相談でプレゼント</h3>
+                                            <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                                                現在の保険料より<span className="font-bold text-red-500">年間約3.2万円</span>お安くなる可能性があります。<br />
+                                                専門家とのオンライン相談（無料）で、<span className="font-bold text-amber-600">Amazonギフトカード1,000円分</span>を必ずプレゼント！
                                             </p>
-                                            <button className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200">
-                                                詳しく聞いてみる
+                                            <button className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-bold shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2">
+                                                <span>予約して特典をもらう</span>
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                </svg>
                                             </button>
+                                            <p className="text-[10px] text-gray-400 mt-2">※ キャンペーン適用には条件があります。</p>
                                         </div>
                                     </div>
                                 </div>
