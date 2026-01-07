@@ -528,16 +528,11 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
                                         ) : (
-                                            <div className="w-full h-full bg-blue-50">
-                                                <video
-                                                    src="https://assets.masco.dev/dd6028/yumi-fb5f/elegant-polite-bow-58eea82e.webm"
-                                                    autoPlay
-                                                    loop
-                                                    muted
-                                                    playsInline
-                                                    className="w-full h-full object-cover transform scale-150 translate-y-2"
-                                                />
-                                            </div>
+                                            <img
+                                                src="https://assets.masco.dev/dd6028/yumi-fb5f/elegant-polite-bow-04192efd.png"
+                                                alt="Yumi"
+                                                className="w-full h-full object-cover object-top transform scale-150 translate-y-2"
+                                            />
                                         )}
                                     </div>
 
