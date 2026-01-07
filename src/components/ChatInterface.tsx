@@ -216,13 +216,13 @@ ${insuranceStatus === "unknown" ? `
 
 **等級は引き継げる？**
 - 解約から13ヶ月以内なら引き継ぎ可能
-- それ以降は新規（6等級）からスタート
     // デフォルト（フォールバック）
-  return `## 🔍 山田様の状況を診断しました
+    return `## 🔍 山田様の状況を診断しました
 
         ご回答ありがとうございます。
         今の状況に基づき、** 損をしないための最適なステップ ** を作成しました。`;
 }
+
 
 export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
     const questions = surveyType === "seller"
