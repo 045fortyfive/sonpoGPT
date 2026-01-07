@@ -140,7 +140,6 @@ function generateGuidance(answers: Record<string, string>, type: "seller" | "inq
     // パターン1: 保険まだ残っている + 次の車決まっている
     if (insuranceStatus === "active" && nextCar === "decided") {
         return `## 🔍 山田様の状況診断結果
-
 | 項目 | 状態 |
 |------|------|
 | 自動車保険 | ✅ まだ有効 |
@@ -149,9 +148,7 @@ function generateGuidance(answers: Record<string, string>, type: "seller" | "inq
 ---
 
 ## 🚗 次のアクションプラン
-
 ### 車両入替が絶対にお得です！
-
 💡 解約してしまうと等級がリセットされますが、**車両入替**なら現在の等級(20等級)を引き継げます。
 
 **必要なもの：**
@@ -166,7 +163,6 @@ function generateGuidance(answers: Record<string, string>, type: "seller" | "inq
     // パターン2: 保険まだ残っている + しばらく乗らない
     if (insuranceStatus === "active" && (nextCar === "wait" || nextCar === "undecided")) {
         return `## 🔍 山田様の状況診断結果
-
 | 項目 | 状態 |
 |------|------|
 | 自動車保険 | ✅ まだ有効 |
@@ -175,11 +171,8 @@ function generateGuidance(answers: Record<string, string>, type: "seller" | "inq
 ---
 
 ## 🚗 次のアクションプラン
-
 ### 「中断証明書」を取りましょう！
-
 💡 解約だけだと等級が消滅します。**中断証明書**を発行すれば、今の等級を最大10年間保存できます。将来また乗る時に有利です。
-
 **必要なもの：**
 - 売却・譲渡の証明
 - 保険証券
@@ -189,42 +182,7 @@ function generateGuidance(answers: Record<string, string>, type: "seller" | "inq
 [TIMELINE:suspension]`;
     }
 
-    // パターン3: 保険解約済み or 分からない
-    if (insuranceStatus === "cancelled" || insuranceStatus === "unknown") {
-        return `## 📋 あなたの状況
-
-| 項目 | 状態 |
-|------|------|
-| 自動車保険 | ${insuranceStatus === "cancelled" ? "✅ 解約済み" : "❓ 不明"} |
-
----
-
-## 🚗 確認すべきこと
-
-### まず保険の状態を確認しましょう
-
-${insuranceStatus === "unknown" ? `
-**確認方法：**
-1. 保険会社からの書類を探す
-2. 銀行口座の引き落とし履歴を確認
-3. 保険会社に直接問い合わせ
-` : ""}
-
----
-
-## 💡 次の車を購入する場合
-
-**等級は引き継げる？**
-- 解約から13ヶ月以内なら引き継ぎ可能
-- それ以降は新規（6等級）からスタート
-`;
-    }
-
-    // デフォルト（フォールバック）
-    return `## 🔍 山田様の状況を診断しました
-
-ご回答ありがとうございます。
-今の状況に基づき、**損をしないための最適なステップ**を作成しました。`;
+    return `## 🔍 山田様の状況診断結果`;
 }
 
 
@@ -284,8 +242,6 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                 return "手続きの流れについて、ご不安な思いをさせてしまい申し訳ございません。\n\nより分かりやすい案内ができるよう、改善に努めてまいります。\n\nご指摘ありがとうございました。";
             case "time":
                 return "お時間をとらせてしまい、大変申し訳ございませんでした。\n\nよりスムーズな対応ができるよう、オペレーションを見直してまいります。\n\n貴重なご意見をありがとうございます。";
-            case "after":
-                return "売却後のことについて、説明不足があり申し訳ございません。\n\nまさに今からご案内する「保険」のことも含め、アフターフォローを強化してまいります。";
             default:
                 return "貴重なフィードバックをありがとうございます！\n\n山田様のお力になれて、スタッフ一同大変嬉しく思います。";
         }
@@ -301,7 +257,6 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
         setMessages((prev) => [...prev, { role: "user", content: label }]);
 
         if (currentQuestion < questions.length - 1) {
-            // Show next question
             const nextQ = questions[currentQuestion + 1];
 
             // Special handling for transition from issue question to insurance questions
@@ -309,52 +264,65 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                 const feedbackMsg = getFeedbackResponse(value);
                 const bridgeMsg = "最後に、手続き忘れで損をしないために... 大切な車の『保険』の状況だけ確認させてください。";
 
+                // 1. Feedback message (Apology/Thanks)
                 setTimeout(() => {
-                    setMessages((prev) => [
-                        ...prev,
-                        { role: "assistant", content: feedbackMsg, isTyping: true },
-                    ]);
+                    setMessages((prev) => [...prev, { role: "assistant", content: feedbackMsg, isTyping: true }]);
 
+                    // 2. Bridge message (Wait for previous to finish reading ~3s)
                     setTimeout(() => {
-                        setMessages((prev) => [
-                            ...prev,
-                            { role: "assistant", content: bridgeMsg, isTyping: true },
-                            { role: "assistant", content: nextQ.text, options: nextQ.options, isTyping: true },
-                        ]);
-                        setCurrentQuestion(currentQuestion + 1);
-                    }, 2500); // Wait for feedback message to be read
-                }, 500);
+                        setMessages((prev) => [...prev, { role: "assistant", content: bridgeMsg, isTyping: true }]);
+
+                        // 3. Next question (Wait for bridge ~2s)
+                        setTimeout(() => {
+                            setMessages((prev) => [...prev, { role: "assistant", content: nextQ.text, options: nextQ.options, isTyping: true }]);
+                            setCurrentQuestion(currentQuestion + 1);
+                        }, 2500);
+
+                    }, 4000);
+
+                }, 800);
             } else {
-                // Normal transition
+                // Normal transition (single question)
                 setTimeout(() => {
-                    setMessages((prev) => [
-                        ...prev,
-                        { role: "assistant", content: nextQ.text, options: nextQ.options, isTyping: true },
-                    ]);
+                    setMessages((prev) => [...prev, { role: "assistant", content: nextQ.text, options: nextQ.options, isTyping: true }]);
                     setCurrentQuestion(currentQuestion + 1);
-                }, 500);
+                }, 800);
             }
         } else {
-            // Survey complete, show static guidance
+            // Survey complete
             setSurveyComplete(true);
+
+            // 1. Show "Calculating/Investigating" state
             setTimeout(() => {
-                const guidance = generateGuidance(newAnswers, surveyType);
+                const thinkingMsg = "診断中...";
+                setMessages((prev) => [...prev, { role: "assistant", content: thinkingMsg, isTyping: true }]);
 
-                // Extract timeline pattern from guidance
-                const timelineMatch = guidance.match(/\[TIMELINE:(replacement|suspension|unknown)\]/);
-                const timelinePattern = timelineMatch ? timelineMatch[1] as "replacement" | "suspension" | "unknown" : undefined;
-                const cleanGuidance = guidance.replace(/\[TIMELINE:(replacement|suspension|unknown)\]/, '').trim();
-
-                setMessages((prev) => [
-                    ...prev,
-                    { role: "assistant", content: cleanGuidance, isGuidance: true, timelinePattern, isTyping: true },
-                ]);
-
-                // Show price input after guidance
+                // 2. Show Guidance and Timeline
                 setTimeout(() => {
-                    setShowPriceInput(true);
-                }, 1000);
-            }, 600);
+                    // Remove "Thinking" message or replace? Better to append result.
+                    // Actually, simpler to just append guidance.
+                    const guidance = generateGuidance(newAnswers, surveyType);
+                    const timelineMatch = guidance.match(/\[TIMELINE:(replacement|suspension|unknown)\]/);
+                    const timelinePattern = timelineMatch ? timelineMatch[1] as "replacement" | "suspension" | "unknown" : undefined;
+                    const cleanGuidance = guidance.replace(/\[TIMELINE:(replacement|suspension|unknown)\]/, '').trim();
+
+                    setMessages((prev) => {
+                        // Remove the last "Thinking" message if desired, or just append. 
+                        // Let's replace the "Thinking" message with the real one for smooth transition, or just append after it.
+                        // Appending is safer.
+                        const filtered = prev.filter(m => m.content !== thinkingMsg);
+                        return [
+                            ...filtered,
+                            { role: "assistant", content: cleanGuidance, isGuidance: true, timelinePattern, isTyping: true }
+                        ];
+                    });
+
+                    // 3. Show Price Input
+                    setTimeout(() => {
+                        setShowPriceInput(true);
+                    }, 2000);
+                }, 2000);
+            }, 800);
         }
     };
 
@@ -529,9 +497,9 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                                             </svg>
                                         ) : (
                                             <img
-                                                src="https://assets.masco.dev/dd6028/yumi-fb5f/elegant-polite-bow-04192efd.png"
+                                                src="/icon.png"
                                                 alt="Yumi"
-                                                className="w-full h-full object-cover object-top transform scale-150 translate-y-2"
+                                                className="w-full h-full object-cover"
                                             />
                                         )}
                                     </div>
