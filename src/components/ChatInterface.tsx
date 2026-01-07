@@ -241,19 +241,19 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                 setTimeout(() => {
                     setMessages((prev) => [...prev, { role: "assistant", content: feedbackMsg, isTyping: true }]);
 
-                    // 2. Bridge message (Wait for previous to finish reading ~3s)
+                    // 2. Bridge message (faster transition)
                     setTimeout(() => {
                         setMessages((prev) => [...prev, { role: "assistant", content: bridgeMsg, isTyping: true }]);
 
-                        // 3. Next question (Wait for bridge ~2s)
+                        // 3. Next question (faster transition)
                         setTimeout(() => {
                             setMessages((prev) => [...prev, { role: "assistant", content: nextQ.text, options: nextQ.options, isTyping: true }]);
                             setCurrentQuestion(currentQuestion + 1);
-                        }, 2500);
+                        }, 1500);
 
-                    }, 4000);
+                    }, 1500);
 
-                }, 800);
+                }, 600);
             } else {
                 // Normal transition (single question)
                 setTimeout(() => {
