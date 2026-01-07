@@ -471,17 +471,19 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
             {!chatEnabled && messages.length > 0 && currentQuestion === 0 && (
                 <div className="bg-white border-b border-gray-100">
                     <div className="max-w-3xl mx-auto px-4 py-8 text-center">
-                        <div className="relative w-32 h-32 mx-auto mb-4">
-                            <img
-                                src="https://assets.masco.dev/dd6028/yumi-fb5f/elegant-polite-bow-b6d8d359.png"
-                                alt="Yumi Bowing"
+                        <div className="relative w-64 h-64 mx-auto mb-4">
+                            <video
+                                src="https://assets.masco.dev/dd6028/yumi-fb5f/elegant-polite-bow-58eea82e.webm"
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
                                 className="w-full h-full object-contain"
                             />
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900 mb-2">山田様、ご利用ありがとうございました！</h2>
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">愛車のご売却、ありがとうございます。</h2>
                         <p className="text-gray-600 text-sm">
-                            愛車のご売却、おめでとうございます。<br />
-                            担当させていただいたAIコンシェルジュのYumiです。
+                            アンケートを実施させていただくAIコンシェルジュのYumiです。
                         </p>
                     </div>
                 </div>
@@ -526,11 +528,16 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
                                         ) : (
-                                            <img
-                                                src="https://assets.masco.dev/dd6028/yumi-fb5f/elegant-polite-bow-04192efd.png"
-                                                alt="Yumi"
-                                                className="w-full h-full object-cover transform scale-125 translate-y-1"
-                                            />
+                                            <div className="w-full h-full bg-blue-50">
+                                                <video
+                                                    src="https://assets.masco.dev/dd6028/yumi-fb5f/elegant-polite-bow-58eea82e.webm"
+                                                    autoPlay
+                                                    loop
+                                                    muted
+                                                    playsInline
+                                                    className="w-full h-full object-cover transform scale-150 translate-y-2"
+                                                />
+                                            </div>
                                         )}
                                     </div>
 
@@ -597,11 +604,16 @@ export default function ChatInterface({ surveyType }: ChatInterfaceProps) {
                         {isLoading && (
                             <div className="flex gap-3 fade-in">
                                 <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center overflow-hidden">
-                                    <img
-                                        src="https://assets.masco.dev/dd6028/yumi-fb5f/elegant-polite-bow-04192efd.png"
-                                        alt="Yumi"
-                                        className="w-full h-full object-cover transform scale-125 translate-y-1"
-                                    />
+                                    <div className="w-full h-full bg-blue-50">
+                                        <video
+                                            src="https://assets.masco.dev/dd6028/yumi-fb5f/elegant-polite-bow-58eea82e.webm"
+                                            autoPlay
+                                            loop
+                                            muted
+                                            playsInline
+                                            className="w-full h-full object-cover transform scale-150 translate-y-2"
+                                        />
+                                    </div>
                                 </div>
                                 <div className="bg-gray-100 rounded-2xl px-4 py-3">
                                     <div className="flex gap-1.5">
