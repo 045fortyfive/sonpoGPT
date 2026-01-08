@@ -19,6 +19,7 @@ interface SurveyProps {
 /**
  * 総合ソリューションアンケート - 統合コンポーネント
  * 
+ * 買取完了画面をきっかけにしたアンケート
  * SurveyA/Bを統合し、新しいデータ構造とロジックを使用
  */
 export default function Survey({ onComplete }: SurveyProps) {

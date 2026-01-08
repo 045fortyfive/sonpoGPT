@@ -73,11 +73,21 @@ export default function ChatSurvey({ onComplete }: SurveyProps) {
     scrollToBottom();
   }, [messages, isReasoning]);
 
-  // 最初の質問を表示
+  // 最初の質問を表示（導入文付き）
   useEffect(() => {
     if (messages.length === 0 && visibleQuestions.length > 0) {
       const firstQuestion = visibleQuestions[0];
-      setMessages([{
+      
+      // 買取完了への感謝と導入文
+      const welcomeMessage: ChatMessage = {
+        id: `msg-welcome-${Date.now()}`,
+        role: 'assistant',
+        content: 'お車のご売却、おつかれさまでした！\n\n売却後も、保険や手続きなど気になることがあると思います。\n\nあなたにぴったりのサポートをご提案するために、いくつか質問させてください。',
+        timestamp: new Date()
+      };
+      
+      // 最初の質問
+      const firstQuestionMessage: ChatMessage = {
         id: `msg-${Date.now()}`,
         role: 'assistant',
         content: firstQuestion.text,
@@ -87,7 +97,9 @@ export default function ChatSurvey({ onComplete }: SurveyProps) {
           icon: opt.icon
         })),
         timestamp: new Date()
-      }]);
+      };
+      
+      setMessages([welcomeMessage, firstQuestionMessage]);
     }
   }, [visibleQuestions]);
 
