@@ -38,10 +38,13 @@
 2. **作業中**
    - タスクIDをコミットメッセージに含める: `feat: [sonpoGPT-xxxx] - [説明]`
    - 関連するタスクは `bd dep add <child> <parent>` でリンク
+   - **重要**: 1タスク1コミットを徹底（複数タスクを1つのコミットにまとめない）
 
 3. **作業完了時**
    ```bash
    bd close <id>               # タスクを完了
+   git add <変更ファイル>        # 該当タスクのファイルのみ
+   git commit -m "feat: [sonpoGPT-xxxx] - [説明]"
    bd sync                     # Gitと同期
    git push                    # 必須: リモートにプッシュ
    ```
