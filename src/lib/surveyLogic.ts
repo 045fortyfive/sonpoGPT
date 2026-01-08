@@ -26,7 +26,7 @@ export function getRecommendedSolutions(
     if (!answer) continue;
 
     const answerValues = Array.isArray(answer) ? answer : [answer];
-    
+
     for (const value of answerValues) {
       const option = question.options.find(o => o.value === value);
       if (option?.solutionIds) {
@@ -55,7 +55,7 @@ export function getFilteredQuestions(
   return allQuestions.filter(q => {
     // Phase 1は常に表示
     if (q.phase === 'trigger') return true;
-    
+
     // シナリオ未確定時はPhase 2以降を表示しない
     if (!currentScenario) return false;
 
@@ -82,7 +82,7 @@ export function shouldShowQuestion(
 ): boolean {
   // Phase 1は常に表示
   if (question.phase === 'trigger') return true;
-  
+
   // シナリオ未確定時はPhase 2以降を表示しない
   if (currentScenario === null || currentScenario === undefined) return false;
 
@@ -93,7 +93,7 @@ export function shouldShowQuestion(
   if (question.showIf) {
     const answer = answers[question.showIf.questionId];
     if (!answer) return false;
-    
+
     const answerValues = Array.isArray(answer) ? answer : [answer];
     return question.showIf.values.some(v => answerValues.includes(v));
   }
@@ -116,7 +116,7 @@ export function getNextQuestion(
 ): SurveyQuestion | null {
   // フィルタリングされた質問リストを取得
   const filteredQuestions = getFilteredQuestions(surveyQuestions, currentScenario || null);
-  
+
   const currentIndex = currentQuestionId
     ? filteredQuestions.findIndex(q => q.id === currentQuestionId)
     : -1;
@@ -146,7 +146,7 @@ export function isSurveyComplete(
 ): boolean {
   // フィルタリングされた質問リストを取得
   const filteredQuestions = getFilteredQuestions(surveyQuestions, currentScenario || null);
-  
+
   // すべての質問に対して回答があるか確認
   for (const question of filteredQuestions) {
     if (shouldShowQuestion(question, answers, currentScenario)) {
@@ -167,6 +167,20 @@ export function isSurveyComplete(
 export function getScenarioFromAnswers(
   answers: Record<string, string | string[]>
 ): ScenarioId | null {
+  // 新しい質問構造: concernの回答からシナリオを取得
+  const concernAnswer = answers['concern'];
+  if (concernAnswer) {
+    const concernQuestion = surveyQuestions.find(q => q.id === 'concern');
+    if (concernQuestion) {
+      const answerValue = Array.isArray(concernAnswer) ? concernAnswer[0] : concernAnswer;
+      const option = concernQuestion.options.find(o => o.value === answerValue);
+      if (option?.nextScenario) {
+        return option.nextScenario;
+      }
+    }
+  }
+
+  // フォールバック: triggerの回答からシナリオを取得
   const triggerAnswer = answers['trigger'];
   if (!triggerAnswer) return null;
 
@@ -175,6 +189,6 @@ export function getScenarioFromAnswers(
 
   const answerValue = Array.isArray(triggerAnswer) ? triggerAnswer[0] : triggerAnswer;
   const option = triggerQuestion.options.find(o => o.value === answerValue);
-  
+
   return option?.nextScenario || null;
 }
