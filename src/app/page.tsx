@@ -19,6 +19,26 @@ export default function Home() {
 
           {/* Entry points */}
           <div className="space-y-4 fade-in" style={{ animationDelay: "0.1s" }}>
+            {/* Survey path - 総合ソリューションアンケート */}
+            <Link
+              href="/survey"
+              className="block w-full group"
+            >
+              <div className="p-6 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-2xl transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/25 hover:-translate-y-0.5">
+                <div className="flex items-center justify-between">
+                  <div className="text-left">
+                    <p className="font-semibold text-lg mb-1">総合ソリューション診断</p>
+                    <p className="text-emerald-100 text-sm">車売却後の最適なソリューションを提案</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
             {/* Seller path */}
             <Link
               href="/seller"
