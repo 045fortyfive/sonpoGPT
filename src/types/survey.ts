@@ -44,6 +44,16 @@ export interface SurveyOption {
 }
 
 /**
+ * ヒント情報（ナーチャリング用）
+ */
+export interface Hint {
+  /** ヒントのテキスト */
+  text: string;
+  /** ヒントのタイプ（デフォルト: 'info'） */
+  type?: 'info' | 'tip' | 'nudge';
+}
+
+/**
  * アンケートの質問
  */
 export interface SurveyQuestion {
@@ -66,6 +76,8 @@ export interface SurveyQuestion {
     /** 表示条件となる回答値のリスト */
     values: string[];
   };
+  /** ナーチャリング用のヒント（質問の前に表示） */
+  hint?: Hint;
 }
 
 /**

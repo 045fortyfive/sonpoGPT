@@ -14,6 +14,10 @@ export const surveyQuestions: SurveyQuestion[] = [
     phase: 'trigger',
     type: 'single',
     text: '今回、お車を売却された主なきっかけは？',
+    hint: {
+      text: 'きっかけに応じて、最適なサポートをご提案します。',
+      type: 'info',
+    },
     options: [
       { value: 'lifecycle', label: '結婚・出産・子育て', icon: '👨‍👩‍👧', nextScenario: 'A' },
       { value: 'buying', label: '新しい車の購入資金', icon: '✨', nextScenario: 'A' },
@@ -34,6 +38,10 @@ export const surveyQuestions: SurveyQuestion[] = [
     branchId: 'A', // 買い替え層のみ
     type: 'single',
     text: '次のお車について教えてください',
+    hint: {
+      text: '次の車の状況に応じて、保険の切替タイミングや手続きをご案内します。',
+      type: 'tip',
+    },
     options: [
       { value: 'decided', label: 'すでに決まっている（納車待ち）' },
       { value: 'searching', label: 'これから探す', solutionIds: ['car-search'] },
@@ -46,6 +54,10 @@ export const surveyQuestions: SurveyQuestion[] = [
     branchId: 'A', // 買い替え層のみ
     type: 'single',
     text: '自動車保険はどうなっていますか？',
+    hint: {
+      text: '現在の保険を一時停止すると、次の車までの期間の保険料を節約できます。',
+      type: 'nudge',
+    },
     options: [
       { value: 'active', label: 'まだ有効', solutionIds: ['insurance-suspend', 'insurance-review'] },
       { value: 'cancelled', label: '解約済み' },
@@ -60,6 +72,10 @@ export const surveyQuestions: SurveyQuestion[] = [
     branchId: 'B', // 手放し層のみ
     type: 'single',
     text: '空いた駐車場はどうされますか？',
+    hint: {
+      text: '使わなくなった駐車場を貸し出すことで、月額数万円の収入になることもあります。',
+      type: 'tip',
+    },
     options: [
       { value: 'vacant', label: '空きになる' },
       { value: 'moving', label: '引っ越すのでなくなる' },
@@ -86,6 +102,10 @@ export const surveyQuestions: SurveyQuestion[] = [
     branchId: 'B', // 手放し層のみ
     type: 'single',
     text: '自動車保険はどうなっていますか？',
+    hint: {
+      text: '車を手放した後も保険が有効なら、一時停止で保険料を節約できます。',
+      type: 'nudge',
+    },
     options: [
       { value: 'active', label: 'まだ有効', solutionIds: ['insurance-suspend', 'insurance-review'] },
       { value: 'cancelled', label: '解約済み' },
@@ -100,6 +120,10 @@ export const surveyQuestions: SurveyQuestion[] = [
     branchId: 'C', // 運転終了層のみ
     type: 'single',
     text: '今後の移動手段について不安はありますか？',
+    hint: {
+      text: '運転を終えても、タクシーや配車サービスなど、便利な移動手段があります。',
+      type: 'info',
+    },
     options: [
       { value: 'anxiety', label: '買い物や通院が不安', solutionIds: ['mobility-alternative'] },
       { value: 'safe', label: '特にない（家族がいる/便利）' },
@@ -111,6 +135,10 @@ export const surveyQuestions: SurveyQuestion[] = [
     branchId: 'C', // 運転終了層のみ
     type: 'single',
     text: '自動車保険はどうなっていますか？',
+    hint: {
+      text: '運転を終えられた場合、保険の解約や一時停止で固定費を削減できます。',
+      type: 'tip',
+    },
     options: [
       { value: 'active', label: 'まだ有効', solutionIds: ['insurance-suspend', 'insurance-review'] },
       { value: 'cancelled', label: '解約済み' },
@@ -125,6 +153,10 @@ export const surveyQuestions: SurveyQuestion[] = [
     phase: 'needs',
     type: 'multiple',
     text: '今後どんなことに興味がありますか？（複数選択可）',
+    hint: {
+      text: '複数選択できます。気になるものがあれば、ぜひ選んでください。',
+      type: 'info',
+    },
     options: [
       { value: 'parking-income', label: '駐車場を活用して収入を得たい', icon: '💰', solutionIds: ['parking-share'] },
       { value: 'insurance-cost', label: '保険の出費を抑えたい', icon: '🛡️', solutionIds: ['insurance-suspend', 'insurance-review'] },
