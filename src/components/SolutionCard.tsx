@@ -12,7 +12,13 @@ interface SolutionCardProps {
  * 
  * アンケート結果に基づいて推奨されるソリューションをカード形式で表示
  */
+import { ParkingSimulation } from './solutions/ParkingSimulation';
+
 export default function SolutionCard({ solution, onCta }: SolutionCardProps) {
+  // 駐車場シェアリングの場合は専用シミュレーションコンポーネントを表示
+  if (solution.id === 'parking-share') {
+    return <ParkingSimulation />;
+  }
   const handleCtaClick = () => {
     onCta(solution.cta.action || 'contact', solution.cta.href);
   };
@@ -25,7 +31,7 @@ export default function SolutionCard({ solution, onCta }: SolutionCardProps) {
         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 text-2xl">
           {solution.icon}
         </div>
-        
+
         {/* Title and Description */}
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-gray-900 mb-2 text-lg leading-tight">
