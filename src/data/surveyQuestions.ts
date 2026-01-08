@@ -15,7 +15,7 @@ export const surveyQuestions: SurveyQuestion[] = [
     type: 'single',
     text: '今回、お車を売却された主なきっかけは？',
     hint: {
-      text: 'きっかけに応じて、最適なサポートをご提案します。',
+      text: 'いくつかの質問にお答えいただくだけで、あなたに最適なサポートをご案内できます。',
       type: 'info',
     },
     options: [
