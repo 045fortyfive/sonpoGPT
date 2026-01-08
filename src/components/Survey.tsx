@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { SurveyQuestion, SurveyAnswers } from '@/types/survey';
+import { useState, useMemo, useEffect } from "react";
+import { SurveyQuestion, SurveyAnswers, ScenarioId } from '@/types/survey';
 import { surveyQuestions } from '@/data/surveyQuestions';
-import { getNextQuestion, getRecommendedSolutions, shouldShowQuestion } from '@/lib/surveyLogic';
+import { 
+  getNextQuestion, 
+  getRecommendedSolutions, 
+  shouldShowQuestion,
+  getFilteredQuestions,
+  getScenarioFromAnswers
+} from '@/lib/surveyLogic';
 import SolutionCard from './SolutionCard';
 
 interface SurveyProps {
@@ -19,11 +25,27 @@ export default function Survey({ onComplete }: SurveyProps) {
   const [answers, setAnswers] = useState<SurveyAnswers>({});
   const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null);
   const [isComplete, setIsComplete] = useState(false);
+  const [scenario, setScenario] = useState<ScenarioId | null>(null);
 
-  // 表示すべき質問のリストを計算
-  const visibleQuestions = useMemo(() => {
-    return surveyQuestions.filter(q => shouldShowQuestion(q, answers));
+  // 回答からシナリオを取得（回答が更新されたら再計算）
+  const scenarioFromAnswers = useMemo(() => {
+    return getScenarioFromAnswers(answers);
   }, [answers]);
+
+  // シナリオが確定したらステートを更新
+  useEffect(() => {
+    if (scenarioFromAnswers && scenarioFromAnswers !== scenario) {
+      setScenario(scenarioFromAnswers);
+    }
+  }, [scenarioFromAnswers, scenario]);
+
+  const currentScenario = scenarioFromAnswers || scenario;
+
+  // 表示すべき質問のリストを計算（シナリオ分岐対応）
+  const visibleQuestions = useMemo(() => {
+    const filtered = getFilteredQuestions(surveyQuestions, currentScenario);
+    return filtered.filter(q => shouldShowQuestion(q, answers, currentScenario));
+  }, [answers, currentScenario]);
 
   // 現在の質問を取得
   const currentQuestion = useMemo(() => {
@@ -74,8 +96,15 @@ export default function Survey({ onComplete }: SurveyProps) {
 
     setAnswers(newAnswers);
 
-    // 次の質問を取得
-    const nextQuestion = getNextQuestion(currentQuestion.id, newAnswers);
+    // 選択したオプションからシナリオを取得
+    const selectedOption = currentQuestion.options.find(o => o.value === value);
+    if (selectedOption?.nextScenario) {
+      setScenario(selectedOption.nextScenario);
+    }
+
+    // 次の質問を取得（シナリオを考慮）
+    const updatedScenario = selectedOption?.nextScenario || currentScenario;
+    const nextQuestion = getNextQuestion(currentQuestion.id, newAnswers, updatedScenario);
 
     if (nextQuestion) {
       setCurrentQuestionId(nextQuestion.id);
@@ -278,7 +307,7 @@ export default function Survey({ onComplete }: SurveyProps) {
             {currentQuestion.type === 'multiple' && (
               <button
                 onClick={() => {
-                  const nextQuestion = getNextQuestion(currentQuestion.id, answers);
+                  const nextQuestion = getNextQuestion(currentQuestion.id, answers, currentScenario);
                   if (nextQuestion) {
                     setCurrentQuestionId(nextQuestion.id);
                   } else {
