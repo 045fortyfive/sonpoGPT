@@ -1,151 +1,169 @@
 /**
  * 総合ソリューションアンケート - 質問データ定義
  * 
- * 買取完了画面をきっかけにしたアンケートの質問データを定義
- * シナリオ分岐機能に対応（A:買い替え、B:手放し、C:運転終了）
+ * /sellerの設計思想ベース: 「価値提供が先、提案は後」
+ * 
+ * Phase 1: 満足度調査（純粋なアンケート - 信頼構築）
+ * Phase 2: 状況確認と教育（ナーチャリング）
+ * Phase 3: 解決策提案（最後に提案）
  */
 
 import { SurveyQuestion } from '@/types/survey';
 
 export const surveyQuestions: SurveyQuestion[] = [
-  // Phase 1: Trigger（きっかけ - シナリオ決定）
+  // ============================================
+  // Phase 1: 満足度調査（純粋なアンケート - 信頼構築）
+  // ============================================
+
+  // Q1: 満足度
   {
-    id: 'trigger',
+    id: 'satisfaction',
     phase: 'trigger',
     type: 'single',
-    text: '今回、お車を売却された主なきっかけは？',
+    text: '今回のご売却体験はいかがでしたか？',
+    options: [
+      { value: 'very-satisfied', label: 'とても満足', icon: '😊' },
+      { value: 'satisfied', label: 'おおむね満足', icon: '🙂' },
+      { value: 'neutral', label: '普通', icon: '😐' },
+      { value: 'unsatisfied', label: 'やや不満', icon: '😕' },
+      { value: 'very-unsatisfied', label: '不満', icon: '😞' },
+    ],
+  },
+
+  // Q2: よかった点
+  {
+    id: 'goodPoint',
+    phase: 'trigger',
+    type: 'single',
+    text: 'ありがとうございます。特によかった点を教えてください。',
+    options: [
+      { value: 'price', label: '査定額の高さ', icon: '💰' },
+      { value: 'process', label: '手続きのスムーズさ', icon: '📋' },
+      { value: 'staff', label: 'スタッフの対応', icon: '👤' },
+      { value: 'speed', label: 'スピード', icon: '⚡' },
+    ],
+  },
+
+  // Q3: 改善点（シナリオ分岐のトリガーを兼ねる）
+  {
+    id: 'concern',
+    phase: 'trigger',
+    type: 'single',
+    text: '貴重なフィードバックをありがとうございます。もし気になる点があれば教えてください。',
+    options: [
+      { value: 'price', label: '査定額', icon: '💵' },
+      { value: 'process', label: '手続き', icon: '📝' },
+      { value: 'after-sale', label: '売却後のことが不明', icon: '❓', nextScenario: 'B' },
+      { value: 'none', label: '特になし', icon: '✅' },
+    ],
+  },
+
+  // ============================================
+  // Phase 2: 状況確認と教育（ナーチャリング）
+  // ============================================
+
+  // Q4: 保険の状況（ブリッジメッセージ付き）
+  {
+    id: 'insurance',
+    phase: 'situation',
+    type: 'single',
+    text: '自動車保険は今どうなっていますか？',
+    // ブリッジメッセージとして表示するヒント
     hint: {
-      text: 'いくつかの質問にお答えいただくだけで、あなたに最適なサポートをご案内できます。',
+      text: '最後に、手続き忘れで損をしないために... 大切な車の「保険」の状況だけ確認させてください。',
       type: 'info',
     },
     options: [
-      { value: 'lifecycle', label: '結婚・出産・子育て', icon: '👨‍👩‍👧', nextScenario: 'A' },
-      { value: 'buying', label: '新しい車の購入資金', icon: '✨', nextScenario: 'A' },
-      { value: 'moving', label: '引っ越し・転勤', icon: '🏠', nextScenario: 'B' },
-      { value: 'cost', label: '維持費・家計の見直し', icon: '💰', nextScenario: 'B' },
-      { value: 'reduce', label: '乗る機会が減った', icon: '📉', nextScenario: 'B' },
-      { value: 'license', label: '免許返納・または検討', icon: '🎓', nextScenario: 'C' },
-      { value: 'care', label: 'ご家族の事情（相続等）', icon: '🤝', nextScenario: 'C' },
+      { value: 'active', label: 'そのまま残っている' },
+      { value: 'cancelled', label: '解約した' },
+      { value: 'unknown', label: '分からない' },
     ],
   },
 
-  // Phase 2: Situation（状況 - シナリオ別）
-
-  // Scenario A: 買い替え
+  // Q5: 保険が残っている場合 - 今後の対応
   {
-    id: 'nextCar',
+    id: 'insuranceAction',
     phase: 'situation',
-    branchId: 'A', // 買い替え層のみ
     type: 'single',
-    text: '次のお車について教えてください',
+    text: '保険の今後の対応について、どうされますか？',
+    showIf: { questionId: 'insurance', values: ['active'] },
+    // 教育メッセージ
     hint: {
-      text: '次の車の状況に応じて、保険の切替タイミングや手続きをご案内します。',
-      type: 'tip',
-    },
-    options: [
-      { value: 'decided', label: 'すでに決まっている（納車待ち）' },
-      { value: 'searching', label: 'これから探す', solutionIds: ['car-search'] },
-      { value: 'none', label: '一時的に車なし生活にする' },
-    ],
-  },
-  {
-    id: 'insuranceStatusA',
-    phase: 'situation',
-    branchId: 'A', // 買い替え層のみ
-    type: 'single',
-    text: '自動車保険はどうなっていますか？',
-    hint: {
-      text: '現在の保険を一時停止すると、次の車までの期間の保険料を節約できます。',
+      text: '車を手放した後も保険が残っていると、使っていないのに保険料が発生し続けます。さらに放置すると「等級」がリセットされ、次に車を持った時に保険料が高くなる可能性があります。',
       type: 'nudge',
     },
     options: [
-      { value: 'active', label: 'まだ有効', solutionIds: ['insurance-suspend', 'insurance-review'] },
-      { value: 'cancelled', label: '解約済み' },
-      { value: 'unknown', label: '分からない', solutionIds: ['insurance-review'] },
+      { value: 'transfer', label: '次の車に引き継ぐ予定' },
+      { value: 'suspend', label: '一時停止（中断証明書）を取りたい', solutionIds: ['insurance-suspend'] },
+      { value: 'cancel', label: '解約したい', solutionIds: ['insurance-review'] },
+      { value: 'unsure', label: '何をすればいいか分からない', solutionIds: ['insurance-suspend', 'insurance-review'] },
     ],
   },
 
-  // Scenario B: 手放し
+  // Q6: 今後の予定（保険が残っている場合）
+  {
+    id: 'futurePlan',
+    phase: 'situation',
+    type: 'single',
+    text: '今後、車を持つ予定はありますか？',
+    showIf: { questionId: 'insuranceAction', values: ['suspend', 'unsure'] },
+    options: [
+      { value: 'decided', label: 'すでに次の車が決まっている' },
+      { value: 'maybe', label: 'そのうち乗り換えるかも' },
+      { value: 'no-car', label: 'しばらく車なし生活' },
+    ],
+  },
+
+  // Q7: 駐車場の状況（車なし生活の場合）
   {
     id: 'parking',
     phase: 'situation',
-    branchId: 'B', // 手放し層のみ
     type: 'single',
     text: '空いた駐車場はどうされますか？',
-    hint: {
-      text: '使わなくなった駐車場を貸し出すことで、月額数万円の収入になることもあります。',
-      type: 'tip',
-    },
+    showIf: { questionId: 'futurePlan', values: ['no-car'] },
     options: [
       { value: 'vacant', label: '空きになる' },
       { value: 'moving', label: '引っ越すのでなくなる' },
-      { value: 'use', label: '別の用途で使う' },
+      { value: 'other-use', label: '別の用途で使う' },
     ],
   },
-  // 教育的質問: 駐車場収益化の認知確認
+
+  // Q8: 駐車場収益化の教育
   {
     id: 'parkingAwareness',
     phase: 'situation',
-    branchId: 'B',
     type: 'single',
     text: '使わなくなった駐車場を貸し出して収入を得られることをご存知ですか？',
     showIf: { questionId: 'parking', values: ['vacant'] },
+    hint: {
+      text: '空いた駐車場を活用して、月々数千円〜数万円の収入を得ている方もいらっしゃいます。',
+      type: 'tip',
+    },
     options: [
       { value: 'yes', label: 'はい、知っています' },
       { value: 'no', label: 'いいえ、知りませんでした', solutionIds: ['parking-share'] },
       { value: 'interested', label: '知らなかったけど興味がある', solutionIds: ['parking-share'] },
     ],
   },
-  {
-    id: 'insuranceStatusB',
-    phase: 'situation',
-    branchId: 'B', // 手放し層のみ
-    type: 'single',
-    text: '自動車保険はどうなっていますか？',
-    hint: {
-      text: '車を手放した後も保険が有効なら、一時停止で保険料を節約できます。',
-      type: 'nudge',
-    },
-    options: [
-      { value: 'active', label: 'まだ有効', solutionIds: ['insurance-suspend', 'insurance-review'] },
-      { value: 'cancelled', label: '解約済み' },
-      { value: 'unknown', label: '分からない', solutionIds: ['insurance-review'] },
-    ],
-  },
 
-  // Scenario C: 運転終了
+  // Q9: 現在の保険料（最後の質問）
   {
-    id: 'mobility',
+    id: 'currentPremium',
     phase: 'situation',
-    branchId: 'C', // 運転終了層のみ
     type: 'single',
-    text: '今後の移動手段について不安はありますか？',
+    text: '参考までに、現在の年間保険料を教えてください。',
+    showIf: { questionId: 'insurance', values: ['active'] },
     hint: {
-      text: '運転を終えても、タクシーや配車サービスなど、便利な移動手段があります。',
+      text: '保険料の目安を教えていただければ、どのくらい節約できるかお伝えできます。',
       type: 'info',
     },
     options: [
-      { value: 'anxiety', label: '買い物や通院が不安', solutionIds: ['mobility-alternative'] },
-      { value: 'safe', label: '特にない（家族がいる/便利）' },
+      { value: 'under-3', label: '3万円未満' },
+      { value: '3-5', label: '3〜5万円' },
+      { value: '5-7', label: '5〜7万円' },
+      { value: '7-10', label: '7〜10万円' },
+      { value: 'over-10', label: '10万円以上' },
+      { value: 'unknown', label: '分からない' },
     ],
   },
-  {
-    id: 'insuranceStatusC',
-    phase: 'situation',
-    branchId: 'C', // 運転終了層のみ
-    type: 'single',
-    text: '自動車保険はどうなっていますか？',
-    hint: {
-      text: '運転を終えられた場合、保険の解約や一時停止で固定費を削減できます。',
-      type: 'tip',
-    },
-    options: [
-      { value: 'active', label: 'まだ有効', solutionIds: ['insurance-suspend', 'insurance-review'] },
-      { value: 'cancelled', label: '解約済み' },
-      { value: 'unknown', label: '分からない', solutionIds: ['insurance-review'] },
-    ],
-  },
-
-  // Phase 3: Needs（ニーズ）は削除
-  // Phase 2の回答から自動的にソリューションを提案するため、needs質問は不要
 ];
