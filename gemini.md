@@ -97,28 +97,36 @@ Gemini/Antigravityは状況に応じてGeminiまたはClaudeを使用できま�
 
 ## 並列作業のルール
 
-### タスク選択
+## Feature Branch Workflow (CRITICAL)
 
-- **優先度の高いタスク**: `bd ready` で表示される順序を尊重
-- **依存関係を確認**: `bd show <id>` でブロッカーを確認
-- **計画タスク**: Opus 4.5での計画が必要なタスクを優先
+**並行作業時のコンフリクトを防ぐため、Feature Branch Workflowを徹底してください。**
 
-### コンフリクト回避
-
-1. **作業開始前**
+1. **タスク開始時**: 専用ブランチを作成
    ```bash
-   git pull --rebase
-   git status  # 未コミットの変更を確認
+   # ブランチ名は task/<taskId> 形式
+   git checkout -b task/sonpoGPT-xxxx
    ```
 
-2. **ブランチ作成**（必要に応じて）
+2. **作業中**: こまめにコミット
    ```bash
-   git checkout -b gemini/<task-id>
+   git add .
+   git commit -m "feat(scope): 変更内容の詳細 #taskId"
    ```
 
-3. **頻繁なコミット**
-   - 小さな単位でコミット
-   - 各コミットは動作する状態を保つ
+3. **タスク完了時**: リモートへプッシュ
+   ```bash
+   git push origin task/sonpoGPT-xxxx
+   # その後、Pull Requestを作成するか、メインブランチへマージ（運用による）
+   ```
+
+4. **ルール**:
+   - **`main` ブランチへの直接プッシュは原則禁止**（特に並行作業時）
+   - タスクが完了したら、必ずリモートにプッシュして他のエージェントと同期可能な状態にする
+   - `bd close` する前にプッシュを完了させる
+
+5. **禁止事項**:
+   - 巨大な変更を一度にまとめてコミットしないこと
+   - ビルドが通らない状態でのプッシュ（WIPコミットはローカルに留める）
 
 ### メモリ共有
 
