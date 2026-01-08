@@ -12,6 +12,7 @@ import {
 } from '@/lib/surveyLogic';
 import SolutionCard from './SolutionCard';
 import { ShaderBorder } from './ui/ShaderBorder';
+import { HintCard } from './ui/HintCard';
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SurveyProps {
@@ -86,7 +87,7 @@ export default function ChatSurvey({ onComplete }: SurveyProps) {
         timestamp: new Date()
       };
       
-      // 最初の質問
+      // 最初の質問（hint情報はメッセージには含めず、レンダリング時に表示）
       const firstQuestionMessage: ChatMessage = {
         id: `msg-${Date.now()}`,
         role: 'assistant',
@@ -180,7 +181,7 @@ export default function ChatSurvey({ onComplete }: SurveyProps) {
     setIsReasoning(false);
 
     if (nextQuestion) {
-      // 次の質問をメッセージに追加
+      // 次の質問をメッセージに追加（hint情報はレンダリング時に表示）
       setMessages(prev => [...prev, {
         id: `msg-${Date.now()}`,
         role: 'assistant',
@@ -235,6 +236,7 @@ export default function ChatSurvey({ onComplete }: SurveyProps) {
     setIsReasoning(false);
 
     if (nextQuestion) {
+      // 次の質問をメッセージに追加（hint情報はレンダリング時に表示）
       setMessages(prev => [...prev, {
         id: `msg-${Date.now()}`,
         role: 'assistant',
@@ -342,23 +344,48 @@ export default function ChatSurvey({ onComplete }: SurveyProps) {
       <div className="flex-1 px-4 py-8 overflow-y-auto">
         <div className="max-w-2xl mx-auto space-y-6">
           <AnimatePresence>
-            {messages.map((message) => (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                    message.role === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
-                >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+            {messages.map((message) => {
+              // アシスタントメッセージの場合、対応する質問を探してhintを表示
+              let hintCard = null;
+              if (message.role === 'assistant' && message.options) {
+                const questionForHint = visibleQuestions.find(q => 
+                  q.text === message.content || 
+                  q.options.some(o => message.options?.some(opt => opt.value === o.value))
+                ) || surveyQuestions.find(q => 
+                  q.text === message.content || 
+                  q.options.some(o => message.options?.some(opt => opt.value === o.value))
+                );
+                
+                if (questionForHint?.hint) {
+                  hintCard = (
+                    <HintCard
+                      text={questionForHint.hint.text}
+                      type={questionForHint.hint.type || 'info'}
+                    />
+                  );
+                }
+              }
+
+              return (
+                <div key={message.id} className="space-y-2">
+                  {/* ヒントカード（質問の前に表示） */}
+                  {hintCard}
+                  
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                        message.role === 'user'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-900'
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap">{message.content}</p>
                   
                   {/* 選択肢 */}
                   {message.options && message.options.length > 0 && (() => {
@@ -442,9 +469,11 @@ export default function ChatSurvey({ onComplete }: SurveyProps) {
                       </div>
                     );
                   })()}
+                    </div>
+                  </motion.div>
                 </div>
-              </motion.div>
-            ))}
+              );
+            })}
           </AnimatePresence>
 
           {/* AI思考中バブル */}
