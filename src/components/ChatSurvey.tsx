@@ -211,12 +211,25 @@ export default function ChatSurvey({ onComplete }: SurveyProps) {
     const answer = answers[questionId];
     if (!answer || (Array.isArray(answer) && answer.length === 0)) return;
 
+    // 回答済みの質問メッセージから選択肢を削除（ループバグ防止）
+    setMessages(prev => prev.map(msg => {
+      // この質問に対応するアシスタントメッセージを探す
+      if (msg.role === 'assistant' && msg.options && 
+          (msg.content === question.text || 
+           msg.options.some(opt => question.options.some(o => o.value === opt.value)))) {
+        // 選択肢を削除（回答済みなので選択肢は不要）
+        return { ...msg, options: undefined };
+      }
+      return msg;
+    }));
+
     // AI思考中ステートを有効化
     setIsReasoning(true);
 
     // 少し待機してから次の質問を表示
     await new Promise(resolve => setTimeout(resolve, 1500));
 
+    // 最新のanswersを使用（既に最新の状態を持っている）
     const nextQuestion = getNextQuestion(questionId, answers, currentScenario);
 
     setIsReasoning(false);
