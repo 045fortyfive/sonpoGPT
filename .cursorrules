@@ -1,0 +1,199 @@
+# Cursor Rules for Multi-Agent Development
+
+このプロジェクトは複数のAIエージェント（Cursor、Gemini/Antigravity、Claude Code、Ralph）が並列で作業するための設定です。
+
+## Cursorの役割
+
+**Cursorは高速実装のメインエージェントです。**
+
+- **高速な実装**: シンプルで明確なタスクを迅速に実装
+- **Claude Skills活用**: APIの代わりにClaudeのskillsを使用可能
+- **インタラクティブ開発**: ユーザーとの対話的な開発
+
+## プロジェクト概要
+
+- **Issue Tracking**: Beads (bd) を使用
+- **自動化**: Ralph による高速ループ開発
+- **並列作業**: 複数エージェントが競合せずに作業
+- **役割分担**: 各エージェントが最適なタスクを自動選択
+
+## Beads統合
+
+### 必須ワークフロー
+
+**重要**: Beadsに登録されていないタスクは実行禁止。必要なら先にタスクを作成してから実行。
+
+1. **作業開始前**
+   ```bash
+   bd ready                    # 利用可能なタスクを確認
+   bd show <id>                # タスク詳細を確認
+   bd update <id> --status in_progress  # タスクを開始
+   ```
+
+2. **タスクが存在しない場合**
+   - 自発的にタスクを追加してもよい
+   - ただし、必ず `bd create` でタスクを作成してから作業開始
+   - タスク作成なしでの作業は禁止
+
+2. **作業中**
+   - タスクIDをコミットメッセージに含める: `feat: [sonpoGPT-xxxx] - [説明]`
+   - 関連するタスクは `bd dep add <child> <parent>` でリンク
+
+3. **作業完了時**
+   ```bash
+   bd close <id>               # タスクを完了
+   bd sync                     # Gitと同期
+   git push                    # 必須: リモートにプッシュ
+   ```
+
+### タスク命名規則
+
+- タスクIDは `sonpoGPT-<hash>` 形式（例: `sonpoGPT-a3f2dd`）
+- コミットメッセージにタスクIDを含める
+- 関連タスクは階層構造を使用可能: `sonpoGPT-a3f8.1.1`
+
+## 並列作業のためのルール
+
+### 1. ファイルロック戦略
+
+- **作業開始前に確認**: `git status` で未コミットの変更を確認
+- **ブランチ分離**: 各エージェントは独立したブランチで作業
+- **小さなコミット**: 頻繁にコミットして競合を最小化
+
+### 2. コンフリクト回避
+
+- **ファイル単位の作業**: 可能な限り異なるファイルを編集
+- **Beadsでタスクを予約**: `bd update <id> --status in_progress` でタスクを予約
+- **作業前に同期**: `git pull --rebase` を実行
+
+### 3. メモリ共有
+
+- **AGENTS.md**: プロジェクト全体のパターンと学習
+- **progress.txt**: Ralphセッションの進捗（`scripts/ralph/progress.txt`）
+- **Beads Issues**: 構造化されたタスク管理
+
+## コード品質
+
+### TypeScript/Next.js
+
+- **型チェック**: `npm run build` で型エラーを確認
+- **Lint**: `npm run lint` を実行
+- **テスト**: 可能な限りテストを追加
+
+### コミット規約
+
+```
+feat: [sonpoGPT-xxxx] - 機能追加
+fix: [sonpoGPT-xxxx] - バグ修正
+refactor: [sonpoGPT-xxxx] - リファクタリング
+docs: [sonpoGPT-xxxx] - ドキュメント更新
+```
+
+## Ralph統合
+
+Ralphが動作中の場合:
+
+1. **Ralphのタスクを尊重**: `scripts/ralph/prd.json` を確認
+2. **進捗を確認**: `scripts/ralph/progress.txt` を読む
+3. **パターンを共有**: 発見したパターンは `progress.txt` の「Codebase Patterns」セクションに追加
+
+## セッション終了時の必須ステップ
+
+**Landing the Plane** - セッション終了時は以下を必ず実行:
+
+1. **残りの作業をIssue化**: `bd create "タイトル" -p 0`
+2. **品質ゲート**: `npm run build && npm run lint`
+3. **Issue状態更新**: 完了したタスクを `bd close`
+4. **同期とプッシュ**:
+   ```bash
+   git pull --rebase
+   bd sync
+   git push
+   git status  # "up to date with origin" を確認
+   ```
+5. **クリーンアップ**: スタッシュのクリア、リモートブランチの整理
+6. **検証**: すべての変更がコミット・プッシュ済みであることを確認
+
+**重要**: 作業は `git push` が成功するまで完了とみなさない
+
+## ファイル構造
+
+```
+sonpoGPT/
+├── .beads/              # Beadsデータベース
+├── scripts/
+│   └── ralph/          # Ralph自動化スクリプト
+│       ├── ralph.sh
+│       ├── prompt.md
+│       ├── prd.json
+│       └── progress.txt
+├── AGENTS.md           # プロジェクト全体の学習
+└── .cursorrules        # このファイル
+```
+
+## タスク選択の自動化
+
+### Cursorが優先的に担当するタスク
+
+Cursorは以下のタスクを優先的に担当します：
+
+- **高速実装が必要なタスク**: `[CURSOR]` タグまたは `[FAST]` タグ
+- **シンプルな実装**: 明確な要件で迅速に実装できるタスク
+- **UIコンポーネント**: フロントエンドの実装
+- **API統合**: 外部APIとの連携（Claude Skills使用可能）
+
+### タスクの自動分離
+
+Beadsのタスクにタグを使用して自動分離：
+
+```bash
+# Cursor向けタスクの作成例
+bd create "[CURSOR] UIコンポーネントの実装" -p 1
+bd create "[FAST] APIエンドポイントの追加" -p 1
+```
+
+タスクの説明に以下のタグがある場合、Cursorが優先的に担当：
+- `[CURSOR]` - Cursor専用
+- `[FAST]` - 高速実装が必要
+- `[UI]` - UIコンポーネント
+- `[API]` - API実装（Claude Skills使用可能）
+
+## Claude Skillsの使用
+
+APIの代わりにClaude Skillsを使用する場合：
+
+1. **Skillsの確認**: 利用可能なskillsを確認
+2. **適切なskillを選択**: タスクに最適なskillを使用
+3. **統合**: skillの結果をコードに統合
+
+例：
+- ブラウザ操作が必要な場合: dev-browser skill
+- ファイル操作が必要な場合: 適切なfile skill
+- 複雑な処理が必要な場合: 専用skill
+
+## エージェント間の協調
+
+### 役割分担
+
+- **Cursor**: 高速実装のメイン（このエージェント）
+  - シンプルで明確なタスクを迅速に実装
+  - Claude Skillsを活用した開発
+- **Gemini/Antigravity**: 作業計画の中心（`gemini.md` を参照）
+  - Opus 4.5での作業計画
+  - 複雑な設計とアーキテクチャ
+  - GeminiまたはClaudeを使用可能
+- **Claude Code**: 汎用的な開発タスク（`claude.md` を参照）
+  - 複雑なロジックの実装
+  - バグ修正とリファクタリング
+- **Ralph**: 自動化された反復開発ループ
+  - 小さなストーリーの自動実装
+
+### 協調のルール
+
+1. **計画の尊重**: Gemini/Antigravityが計画を立てた場合、その計画に従う
+2. **タスクの予約**: Beadsでタスクを予約してから作業開始
+3. **メモリ共有**: 発見したパターンは `AGENTS.md` に追加
+4. **競合回避**: 他のエージェントが作業中のファイルは避ける
+
+各エージェントは独立して動作できますが、Beadsを通じてタスクを共有し、役割に応じて自動的にタスクを選択します。
+
