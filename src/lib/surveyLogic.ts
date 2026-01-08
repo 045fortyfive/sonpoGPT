@@ -2,9 +2,10 @@
  * 総合ソリューションアンケート - ロジック実装
  * 
  * アンケート回答から推奨ソリューションを算出するロジック
+ * シナリオ分岐機能に対応（A:買い替え、B:手放し、C:運転終了）
  */
 
-import { SurveyQuestion, Solution } from '@/types/survey';
+import { SurveyQuestion, Solution, ScenarioId } from '@/types/survey';
 import { surveyQuestions } from '@/data/surveyQuestions';
 import { solutions } from '@/data/solutions';
 
@@ -41,28 +42,63 @@ export function getRecommendedSolutions(
 }
 
 /**
+ * シナリオに応じて質問をフィルタリング
+ * 
+ * @param allQuestions すべての質問
+ * @param currentScenario 現在のシナリオ（nullの場合は未確定）
+ * @returns フィルタリングされた質問リスト
+ */
+export function getFilteredQuestions(
+  allQuestions: SurveyQuestion[],
+  currentScenario: ScenarioId | null
+): SurveyQuestion[] {
+  return allQuestions.filter(q => {
+    // Phase 1は常に表示
+    if (q.phase === 'trigger') return true;
+    
+    // シナリオ未確定時はPhase 2以降を表示しない
+    if (!currentScenario) return false;
+
+    // シナリオ指定がある質問は、現在のシナリオと一致する場合のみ表示
+    if (q.branchId && q.branchId !== currentScenario) return false;
+
+    // シナリオ指定がない質問は全シナリオ共通として表示
+    return true;
+  });
+}
+
+/**
  * 質問を表示すべきかどうかを判定（条件分岐対応）
  * 
  * @param question 判定対象の質問
  * @param answers 現在までの回答
+ * @param currentScenario 現在のシナリオ（オプション）
  * @returns 質問を表示すべきかどうか
  */
 export function shouldShowQuestion(
   question: SurveyQuestion,
-  answers: Record<string, string | string[]>
+  answers: Record<string, string | string[]>,
+  currentScenario?: ScenarioId | null
 ): boolean {
-  // showIfが設定されていない場合は常に表示
-  if (!question.showIf) return true;
+  // Phase 1は常に表示
+  if (question.phase === 'trigger') return true;
   
-  // 参照する質問の回答を取得
-  const answer = answers[question.showIf.questionId];
-  if (!answer) return false;
-  
-  // 回答値を配列に変換
-  const answerValues = Array.isArray(answer) ? answer : [answer];
-  
-  // 条件に一致する値が含まれているか確認
-  return question.showIf.values.some(v => answerValues.includes(v));
+  // シナリオ未確定時はPhase 2以降を表示しない
+  if (currentScenario === null || currentScenario === undefined) return false;
+
+  // シナリオ指定がある質問は、現在のシナリオと一致する場合のみ表示
+  if (question.branchId && question.branchId !== currentScenario) return false;
+
+  // showIfが設定されている場合は条件を確認
+  if (question.showIf) {
+    const answer = answers[question.showIf.questionId];
+    if (!answer) return false;
+    
+    const answerValues = Array.isArray(answer) ? answer : [answer];
+    return question.showIf.values.some(v => answerValues.includes(v));
+  }
+
+  return true;
 }
 
 /**
@@ -70,20 +106,25 @@ export function shouldShowQuestion(
  * 
  * @param currentQuestionId 現在の質問ID
  * @param answers 現在までの回答
+ * @param currentScenario 現在のシナリオ（オプション）
  * @returns 次の質問、またはnull（すべて完了した場合）
  */
 export function getNextQuestion(
   currentQuestionId: string | null,
-  answers: Record<string, string | string[]>
+  answers: Record<string, string | string[]>,
+  currentScenario?: ScenarioId | null
 ): SurveyQuestion | null {
+  // フィルタリングされた質問リストを取得
+  const filteredQuestions = getFilteredQuestions(surveyQuestions, currentScenario || null);
+  
   const currentIndex = currentQuestionId
-    ? surveyQuestions.findIndex(q => q.id === currentQuestionId)
+    ? filteredQuestions.findIndex(q => q.id === currentQuestionId)
     : -1;
 
   // 次の質問を探す
-  for (let i = currentIndex + 1; i < surveyQuestions.length; i++) {
-    const question = surveyQuestions[i];
-    if (shouldShowQuestion(question, answers)) {
+  for (let i = currentIndex + 1; i < filteredQuestions.length; i++) {
+    const question = filteredQuestions[i];
+    if (shouldShowQuestion(question, answers, currentScenario)) {
       return question;
     }
   }
@@ -96,18 +137,44 @@ export function getNextQuestion(
  * アンケートが完了したかどうかを判定
  * 
  * @param answers 現在までの回答
+ * @param currentScenario 現在のシナリオ（オプション）
  * @returns アンケートが完了したかどうか
  */
 export function isSurveyComplete(
-  answers: Record<string, string | string[]>
+  answers: Record<string, string | string[]>,
+  currentScenario?: ScenarioId | null
 ): boolean {
+  // フィルタリングされた質問リストを取得
+  const filteredQuestions = getFilteredQuestions(surveyQuestions, currentScenario || null);
+  
   // すべての質問に対して回答があるか確認
-  for (const question of surveyQuestions) {
-    if (shouldShowQuestion(question, answers)) {
+  for (const question of filteredQuestions) {
+    if (shouldShowQuestion(question, answers, currentScenario)) {
       if (!answers[question.id]) {
         return false;
       }
     }
   }
   return true;
+}
+
+/**
+ * 回答からシナリオを取得
+ * 
+ * @param answers 現在までの回答
+ * @returns シナリオID、またはnull（未確定の場合）
+ */
+export function getScenarioFromAnswers(
+  answers: Record<string, string | string[]>
+): ScenarioId | null {
+  const triggerAnswer = answers['trigger'];
+  if (!triggerAnswer) return null;
+
+  const triggerQuestion = surveyQuestions.find(q => q.id === 'trigger');
+  if (!triggerQuestion) return null;
+
+  const answerValue = Array.isArray(triggerAnswer) ? triggerAnswer[0] : triggerAnswer;
+  const option = triggerQuestion.options.find(o => o.value === answerValue);
+  
+  return option?.nextScenario || null;
 }
