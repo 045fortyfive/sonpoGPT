@@ -2,7 +2,7 @@
 
 ## 概要
 
-車売却のきっかけに応じて、「買い替え」「手放し」「運転終了」の3シナリオに分岐する人間らしい質問フローを実装する。
+買取完了画面をきっかけに、「買い替え」「手放し」「運転終了」の3シナリオに分岐する人間らしい質問フローを実装する。
 
 ---
 
@@ -49,7 +49,7 @@ export interface SurveyQuestion {
   id: 'trigger',
   phase: 'trigger',
   type: 'single',
-  text: '今回、お車を手放された主なきっかけは？',
+  text: '今回、お車を売却された主なきっかけは？',
   options: [
     { value: 'lifecycle', label: '結婚・出産・子育て', icon: '👨‍👩‍👧', nextScenario: 'A' },
     { value: 'buying', label: '新しい車の購入資金', icon: '✨', nextScenario: 'A' },
@@ -139,18 +139,18 @@ export function getFilteredQuestions(
 
 ## 4. 実装手順
 
-1. **型定義更新**: `SurveyQuestion` に `branchId`、`SurveyOption` に `nextScenario` を追加
-2. **データ更新**: `surveyQuestions.ts` を上記構造に合わせて書き換え
-3. **ロジック更新**: シナリオ分岐ロジックを実装
-4. **UI更新**: `Survey.tsx` で回答時に `nextScenario` があればステートを更新する処理を追加
+1. ✅ **型定義更新**: `SurveyQuestion` に `branchId`、`SurveyOption` に `nextScenario` を追加（完了）
+2. ✅ **データ更新**: `surveyQuestions.ts` を上記構造に合わせて書き換え（完了）
+3. ✅ **ロジック更新**: シナリオ分岐ロジックを実装（完了）
+4. ✅ **UI更新**: `Survey.tsx` と `ChatSurvey.tsx` で回答時に `nextScenario` があればステートを更新する処理を追加（完了）
 
 ---
 
 ## 動作確認ポイント
 
-- [ ] 「結婚」を選ぶ → 次の質問が「次のお車」になる（駐車場の質問が出ない）
-- [ ] 「引っ越し」を選ぶ → 次の質問が「駐車場」になる
-- [ ] 「免許返納」を選ぶ → 次の質問が「移動手段の不安」になる
+- [x] 「結婚」を選ぶ → 次の質問が「次のお車」になる（駐車場の質問が出ない）
+- [x] 「引っ越し」を選ぶ → 次の質問が「駐車場」になる
+- [x] 「免許返納」を選ぶ → 次の質問が「移動手段の不安」になる
 
 ---
 
@@ -206,9 +206,10 @@ export function ShaderBorder({ children }: { children: React.ReactNode }) {
 
 ## 6. 実装手順まとめ
 
-3. **Chat UI基盤**: パッケージ導入 & `ShaderBorder.tsx`
-4. **Chat実装**: `ChatSurvey.tsx` (アニメーション含む)
-5. **統合**: `page.tsx` から呼び出し
+1. ✅ **Chat UI基盤**: パッケージ導入 & `ShaderBorder.tsx`（完了）
+2. ✅ **Chat実装**: `ChatSurvey.tsx` (アニメーション含む)（完了）
+3. ✅ **統合**: `src/app/survey/page.tsx` から呼び出し（完了）
+4. ✅ **導入文追加**: 買取完了への感謝と次のステップへの誘導として自然な導入文を追加（完了）
 
 ---
 
@@ -227,14 +228,14 @@ akippaなどの駐車場シェアリング提案時に表示する、リッチ�
 - **収益シミュレーション**:
   - 郵便番号からエリアを特定（モックでOK）
   - 「周辺相場: 600円/日」
-  - 「月間予想収益: 18,000円」（稼働率50%計算など）
+  - 「月間予想収益: 5,400円」（稼働率30%計算など現実的な値）
 
 #### UI実装イメージ
 ```tsx
 export function ParkingSimulation({ zipCode }: { zipCode?: string }) {
   // モックデータ (実際はAPI等で取得)
   const pricePerDay = 600;
-  const monthlyRevenue = pricePerDay * 30 * 0.5; // 稼働率50%
+  const monthlyRevenue = pricePerDay * 30 * 0.3; // 稼働率30%（現実的なシミュレーション）
 
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100 my-4">
@@ -273,9 +274,28 @@ export function ParkingSimulation({ zipCode }: { zipCode?: string }) {
 
 ---
 
-## 8. 次のアクション
+## 8. 実装状況
 
-1. **AI Chat UI実装** (`ChatSurvey.tsx` など)
-2. **駐車場シミュレーション** (`ParkingSimulation.tsx`)
-3. **統合**
+### 完了した実装
+
+1. ✅ **AI Chat UI実装** (`ChatSurvey.tsx` など) - 完了
+   - 対話型チャットUI実装
+   - AI思考中エフェクト（ShaderBorder使用）
+   - シナリオ分岐機能対応
+   - 買取完了への感謝と導入文追加
+
+2. ✅ **統合** - 完了
+   - `src/app/survey/page.tsx` で `ChatSurvey` を使用
+
+### 未実装
+
+1. ⏳ **駐車場シミュレーション** (`ParkingSimulation.tsx`)
+   - `parking-share` ソリューション提案時に表示するリッチなシミュレーションUI
+   - Google Maps表示（モック可）
+   - 収益シミュレーション表示
+
+## 9. 次のアクション
+
+1. **駐車場シミュレーション実装** (`ParkingSimulation.tsx`)
+2. **ChatSurveyへの統合** - `parking-share` ソリューション表示時に `ParkingSimulation` を表示
 
