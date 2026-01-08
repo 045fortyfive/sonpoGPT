@@ -135,13 +135,27 @@ export default function ChatSurvey({ onComplete }: SurveyProps) {
       const selectedOption = question.options.find(o => o.value === value);
       const selectedLabel = selectedOption?.label || value;
 
-      // ユーザーの回答をメッセージに追加
-      setMessages(prev => [...prev, {
-        id: `msg-${Date.now()}`,
-        role: 'user',
-        content: selectedLabel,
-        timestamp: new Date()
-      }]);
+      // ユーザーの回答をメッセージに追加し、回答済みの質問メッセージから選択肢を削除（ループバグ防止）
+      setMessages(prev => {
+        const updated = prev.map(msg => {
+          // この質問に対応するアシスタントメッセージを探す
+          if (msg.role === 'assistant' && msg.options && 
+              (msg.content === question.text || 
+               msg.options.some(opt => question.options.some(o => o.value === opt.value)))) {
+            // 選択肢を削除（回答済みなので選択肢は不要）
+            return { ...msg, options: undefined };
+          }
+          return msg;
+        });
+        
+        // ユーザーの回答を追加
+        return [...updated, {
+          id: `msg-${Date.now()}`,
+          role: 'user',
+          content: selectedLabel,
+          timestamp: new Date()
+        }];
+      });
     }
 
     setAnswers(newAnswers);
@@ -335,13 +349,27 @@ export default function ChatSurvey({ onComplete }: SurveyProps) {
                   
                   {/* 選択肢 */}
                   {message.options && message.options.length > 0 && (() => {
-                    // このメッセージに対応する質問を探す
+                    // このメッセージに対応する質問を探す（visibleQuestionsとsurveyQuestionsの両方から）
                     const questionForMessage = visibleQuestions.find(q => 
+                      q.text === message.content || 
+                      q.options.some(o => message.options?.some(opt => opt.value === o.value))
+                    ) || surveyQuestions.find(q => 
                       q.text === message.content || 
                       q.options.some(o => message.options?.some(opt => opt.value === o.value))
                     );
                     
                     if (!questionForMessage) return null;
+
+                    // 単一選択で回答済みの場合は選択肢を表示しない
+                    if (questionForMessage.type === 'single' && answers[questionForMessage.id]) {
+                      return null;
+                    }
+
+                    // 複数選択で回答がない場合も、メッセージが古い可能性があるので確認
+                    if (questionForMessage.type === 'multiple' && !answers[questionForMessage.id]) {
+                      // 回答がない場合は表示しない（次の質問に進んでいる可能性がある）
+                      return null;
+                    }
 
                     return (
                       <div className="mt-4 space-y-2">
