@@ -1,0 +1,21 @@
+{
+  "branchName": "ralph/feature",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Example: Add user authentication form",
+      "acceptanceCriteria": [
+        "Email/password input fields",
+        "Validates email format",
+        "Shows error messages",
+        "TypeScript typecheck passes",
+        "Lint passes",
+        "Verify at http://localhost:3000/login"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Replace this with your actual user stories"
+    }
+  ]
+}
+

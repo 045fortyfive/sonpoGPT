@@ -46,6 +46,33 @@
    git push                    # 必須: リモートにプッシュ
    ```
 
+4. **レビュー依頼（推奨）**
+   複数タスク完了時や重要な実装後は、Gemini/Antigravityに確認を依頼：
+   ```bash
+   bd create "[OPUS] タスク名のレビュー依頼" -p 0 --description="完了内容と確認事項を記述"
+   ```
+   - `[OPUS]` タグでGemini/Antigravityが拾う
+   - 確認事項（型定義の妥当性、設計との整合性等）を記述
+
+## Git運用ルール (CRITICAL)
+
+**タスク完了ごとに必ずコミットし、プッシュしてください。**
+
+1. **コミットメッセージ**: タスクIDを含めること
+   ```bash
+   git add .
+   git commit -m "feat(scope): 変更内容の詳細 #taskId"
+   # 例: git commit -m "feat(survey): アンケートの分岐ロジック実装 #sonpoGPT-cvt"
+   ```
+
+2. **プッシュタイミング**:
+   - 基本的にコミットごとにプッシュ (`git push origin main`)
+   - これにより、他のエージェントやユーザーが最新状態を常に参照できるようにする
+
+3. **禁止事項**:
+   - 巨大な変更を一度にまとめてコミットしないこと
+   - ビルドが通らない状態でのプッシュ（WIPコミットはローカルに留める）
+
 ### タスク命名規則
 
 - タスクIDは `sonpoGPT-<hash>` 形式（例: `sonpoGPT-a3f2dd`）

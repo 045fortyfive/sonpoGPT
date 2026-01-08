@@ -1,0 +1,28 @@
+# Ralph Progress Log
+Started: 2025-01-15
+
+## Codebase Patterns
+
+Add reusable patterns here as you discover them. These will be read first in each iteration.
+
+Examples:
+- Migrations: Use IF NOT EXISTS
+- React: useRef<Timeout | null>(null)
+- Next.js: Server actions should be in app/actions.ts
+- TypeScript: Export types from types.ts
+
+## Key Files
+
+Important files to reference:
+- `src/app/layout.tsx` - Root layout
+- `src/app/page.tsx` - Home page
+- `AGENTS.md` - Project-wide learnings
+- `.cursorrules` - Cursor agent rules
+- `gemini.md` - Gemini agent rules
+
+---
+
+## Session Log
+
+Ralph will append learnings here after each story completion.
+

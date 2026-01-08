@@ -2,17 +2,18 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function proxy(request: NextRequest) {
+    // === IP制限を一時的に無効化 ===
     // 許可するIPアドレスのリスト
-    const allowedIPs = ['182.169.22.84', '162.120.184.18']
+    // const allowedIPs = ['182.169.22.84', '162.120.184.18']
 
     // クライアントのIPアドレスを取得
-    const clientIP = request.headers.get('x-forwarded-for') ||
-        request.headers.get('x-real-ip')
+    // const clientIP = request.headers.get('x-forwarded-for') ||
+    //     request.headers.get('x-real-ip')
 
     // IPアドレスが取得できない、または許可リストにない場合はアクセス拒否
-    if (!clientIP || !allowedIPs.some(ip => clientIP.includes(ip))) {
-        return NextResponse.redirect(new URL('/access-denied', request.url))
-    }
+    // if (!clientIP || !allowedIPs.some(ip => clientIP.includes(ip))) {
+    //     return NextResponse.redirect(new URL('/access-denied', request.url))
+    // }
 
     return NextResponse.next()
 }
