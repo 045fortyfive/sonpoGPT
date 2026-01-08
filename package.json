@@ -11,6 +11,7 @@
     "ralph": "./scripts/ralph/ralph.sh"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^2.0.2",
     "@paper-design/shaders-react": "^0.0.68",
     "clsx": "^2.1.1",
     "framer-motion": "^12.24.10",
