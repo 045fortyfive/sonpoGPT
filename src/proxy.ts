@@ -7,8 +7,7 @@ export function proxy(request: NextRequest) {
 
     // クライアントのIPアドレスを取得
     const clientIP = request.headers.get('x-forwarded-for') ||
-        request.headers.get('x-real-ip') ||
-        request.ip
+        request.headers.get('x-real-ip')
 
     // IPアドレスが取得できない、または許可リストにない場合はアクセス拒否
     if (!clientIP || !allowedIPs.some(ip => clientIP.includes(ip))) {
