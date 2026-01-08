@@ -20,6 +20,14 @@ export type QuestionPhase = 'trigger' | 'situation' | 'needs';
 export type QuestionType = 'single' | 'multiple';
 
 /**
+ * シナリオID
+ * - A: 買い替え
+ * - B: 手放し
+ * - C: 運転終了
+ */
+export type ScenarioId = 'A' | 'B' | 'C';
+
+/**
  * アンケートの選択肢
  */
 export interface SurveyOption {
@@ -31,6 +39,8 @@ export interface SurveyOption {
   icon?: string;
   /** この選択肢が選ばれた時に関連するソリューションID */
   solutionIds?: string[];
+  /** この回答選択時に遷移するシナリオ */
+  nextScenario?: ScenarioId;
 }
 
 /**
@@ -47,6 +57,8 @@ export interface SurveyQuestion {
   type: QuestionType;
   /** 選択肢のリスト */
   options: SurveyOption[];
+  /** 特定シナリオでのみ表示する質問（未指定なら全シナリオ共通） */
+  branchId?: ScenarioId;
   /** 条件分岐：前の回答に応じてこの質問を表示するかどうか */
   showIf?: {
     /** 参照する質問ID */
