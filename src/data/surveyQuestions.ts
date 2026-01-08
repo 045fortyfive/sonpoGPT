@@ -61,9 +61,23 @@ export const surveyQuestions: SurveyQuestion[] = [
     type: 'single',
     text: '空いた駐車場はどうされますか？',
     options: [
-      { value: 'vacant', label: '空きになる（貸して収益化したい）', solutionIds: ['parking-share'] },
+      { value: 'vacant', label: '空きになる' },
       { value: 'moving', label: '引っ越すのでなくなる' },
       { value: 'use', label: '別の用途で使う' },
+    ],
+  },
+  // 教育的質問: 駐車場収益化の認知確認
+  {
+    id: 'parkingAwareness',
+    phase: 'situation',
+    branchId: 'B',
+    type: 'single',
+    text: '使わなくなった駐車場を貸し出して収入を得られることをご存知ですか？',
+    showIf: { questionId: 'parking', values: ['vacant'] },
+    options: [
+      { value: 'yes', label: 'はい、知っています' },
+      { value: 'no', label: 'いいえ、知りませんでした', solutionIds: ['parking-share'] },
+      { value: 'interested', label: '知らなかったけど興味がある', solutionIds: ['parking-share'] },
     ],
   },
   {
