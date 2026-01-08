@@ -206,8 +206,76 @@ export function ShaderBorder({ children }: { children: React.ReactNode }) {
 
 ## 6. 実装手順まとめ
 
-1. **型・データ修正**: `ScenarioId`, `branchId` 追加
-2. **ロジック実装**: `surveyLogic.ts` (分岐ロジック)
 3. **Chat UI基盤**: パッケージ導入 & `ShaderBorder.tsx`
 4. **Chat実装**: `ChatSurvey.tsx` (アニメーション含む)
 5. **統合**: `page.tsx` から呼び出し
+
+---
+
+## 7. 駐車場収益シミュレーション実装 (New)
+
+akippaなどの駐車場シェアリング提案時に表示する、リッチなシミュレーションUIを実装します。
+
+### 1. `src/components/solutions/ParkingSimulation.tsx`
+
+#### 機能要件
+- **Google Maps表示**:
+  - APIキーがあれば `react-google-maps` 等を使用
+  - ない場合は `iframe` (embed API) または **静的なモック画像**（地図風デザイン + ピン）で代用（MVPとしてはモック推奨）
+  - ピンの上に「600円/日」のようなチップを表示
+
+- **収益シミュレーション**:
+  - 郵便番号からエリアを特定（モックでOK）
+  - 「周辺相場: 600円/日」
+  - 「月間予想収益: 18,000円」（稼働率50%計算など）
+
+#### UI実装イメージ
+```tsx
+export function ParkingSimulation({ zipCode }: { zipCode?: string }) {
+  // モックデータ (実際はAPI等で取得)
+  const pricePerDay = 600;
+  const monthlyRevenue = pricePerDay * 30 * 0.5; // 稼働率50%
+
+  return (
+    <div className="bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100 my-4">
+      {/* Map Area */}
+      <div className="h-48 bg-gray-100 relative">
+        {/* Map Mock or Component */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+           <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-md">
+             相場: {pricePerDay}円/日
+           </div>
+        </div>
+      </div>
+      
+      {/* Simulation Result */}
+      <div className="p-4">
+        <h4 className="text-gray-900 font-bold mb-2">あなたの駐車場なら...</h4>
+        <div className="flex justify-between items-end border-b pb-2 mb-2">
+           <span className="text-gray-500 text-sm">月間予想収益</span>
+           <span className="text-2xl font-bold text-blue-600">
+             ¥{monthlyRevenue.toLocaleString()}
+           </span>
+        </div>
+        <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">
+          シミュレーション詳細へ
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+### 2. 統合
+
+- **ChatSurvey** 内で、`parking-share` ソリューションが提案される際に、この `ParkingSimulation` コンポーネントを表示するようにロジックを追加してください。
+- ユーザーが郵便番号を入力ずみであればそれをプロップスとして渡します。
+
+---
+
+## 8. 次のアクション
+
+1. **AI Chat UI実装** (`ChatSurvey.tsx` など)
+2. **駐車場シミュレーション** (`ParkingSimulation.tsx`)
+3. **統合**
+
