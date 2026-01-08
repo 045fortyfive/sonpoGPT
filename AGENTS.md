@@ -57,6 +57,24 @@ Example:
 
 Ralph integrates with Beads - it creates and closes tasks automatically.
 
+## Commit Rules
+
+**重要**: 1タスク1コミットを徹底してください。
+
+- 各タスクは独立したコミットとして記録
+- 複数のタスクを1つのコミットにまとめない
+- コミットメッセージにタスクIDを含める: `feat: [sonpoGPT-xxxx] - [説明]`
+- タスク完了時に必ずコミットしてから`bd close`
+
+例：
+```bash
+# ✅ 良い例: 1タスク1コミット
+git commit -m "feat: [sonpoGPT-xxxx] - タスクの説明"
+
+# ❌ 悪い例: 複数タスクを1つのコミットに
+git commit -m "feat: [sonpoGPT-xxxx] [sonpoGPT-yyyy] - 複数のタスク"
+```
+
 ## Parallel Work Coordination
 
 ### Task Selection
