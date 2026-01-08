@@ -146,25 +146,6 @@ export const surveyQuestions: SurveyQuestion[] = [
     ],
   },
 
-  // Phase 3: Needs（ニーズ - 複数選択）
-  // シナリオ共通のニーズ質問
-  {
-    id: 'needs',
-    phase: 'needs',
-    type: 'multiple',
-    text: '今後どんなことに興味がありますか？（複数選択可）',
-    hint: {
-      text: '複数選択できます。気になるものがあれば、ぜひ選んでください。',
-      type: 'info',
-    },
-    options: [
-      { value: 'parking-income', label: '駐車場を活用して収入を得たい', icon: '💰', solutionIds: ['parking-share'] },
-      { value: 'insurance-cost', label: '保険の出費を抑えたい', icon: '🛡️', solutionIds: ['insurance-suspend', 'insurance-review'] },
-      { value: 'cost-reduction', label: '生活費・固定費を見直したい', icon: '📉', solutionIds: ['cost-review'] },
-      { value: 'next-car', label: '次の車を探したい', icon: '🚙', solutionIds: ['car-search'] },
-      { value: 'inheritance', label: '遺産・相続の手続きを進めたい', icon: '📋', solutionIds: ['inheritance-support'] },
-      { value: 'no-drive-life', label: '運転しない生活を始めたい', icon: '🚌', solutionIds: ['mobility-alternative'] },
-      { value: 'info', label: '情報収集中', icon: '🔍' },
-    ],
-  },
+  // Phase 3: Needs（ニーズ）は削除
+  // Phase 2の回答から自動的にソリューションを提案するため、needs質問は不要
 ];
