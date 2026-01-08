@@ -1,7 +1,7 @@
 /**
  * 総合ソリューションアンケート - 質問データ定義
  * 
- * 車売却をきっかけにしたアンケートの質問データを定義
+ * 買取完了画面をきっかけにしたアンケートの質問データを定義
  * シナリオ分岐機能に対応（A:買い替え、B:手放し、C:運転終了）
  */
 
@@ -13,7 +13,7 @@ export const surveyQuestions: SurveyQuestion[] = [
     id: 'trigger',
     phase: 'trigger',
     type: 'single',
-    text: '今回、お車を手放された主なきっかけは？',
+    text: '今回、お車を売却された主なきっかけは？',
     options: [
       { value: 'lifecycle', label: '結婚・出産・子育て', icon: '👨‍👩‍👧', nextScenario: 'A' },
       { value: 'buying', label: '新しい車の購入資金', icon: '✨', nextScenario: 'A' },
